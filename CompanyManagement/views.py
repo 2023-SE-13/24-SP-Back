@@ -34,6 +34,9 @@ class CompanyMemberCURDViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['PUT'])
+@csrf_exempt
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def create_company(request):
     data = json.loads(request.body.decode('utf-8'))
     company_name = data.get('company_name')
