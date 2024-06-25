@@ -9,7 +9,7 @@ from shared.utils.datetime import get_expiry_time
 
 
 class Company(models.Model):
-    company_id = models.CharField(max_length=40, primary_key=True)
+    company_id = models.CharField(max_length=40, primary_key=True, auto_created=True)
     company_name = models.CharField(max_length=255)
     company_description = models.CharField(max_length=255)
     company_image = models.ImageField(upload_to='resources/company_images/', null=True, blank=True)
