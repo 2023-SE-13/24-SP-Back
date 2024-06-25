@@ -143,7 +143,6 @@ def send_join_verification(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @require_company
-@require_user
 def accept_join_verification(request):
     current_user = request.user
     company = request.company_object
