@@ -4,7 +4,7 @@ from UserManagement.models import User
 from CompanyManagement.models import Company
 # Create your models here.
 
-class JoinVerification(models.Model):
+class Subscribe(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
