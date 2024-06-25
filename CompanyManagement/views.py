@@ -50,7 +50,7 @@ def create_company(request):
 
     company = Company(company_name=company_name, company_description=company_description)
     company.save()
-    company_id = company.id
+    # company_id = company.company_id
     # 设置默认image
     # default_image_path = 'resources/company_images/default_image.png'
     # with open(default_image_path, 'rb') as f:
