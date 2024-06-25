@@ -12,7 +12,8 @@ urlpatterns = [
     path('logout', views.logout),
     path('register', views.register),
     path('verification', views.get_verification_code),
+    path('get_user', views.get_user),
     # path('update_user', views.update_user),
-    # path('get_user', views.get_user),
+
     # path('upload_avatar', views.set_user_avatar)
 ]

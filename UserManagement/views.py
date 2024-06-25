@@ -208,3 +208,11 @@ def logout(request):
 #         return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"},
 #                             status=status.HTTP_400_BAD_REQUEST)
 #     return JsonResponse({"status": "success", "message": "Avatar updated successfully"}, status=status.HTTP_200_OK)
+
+@csrf_exempt
+@api_view(['GET'])
+@require_user
+def get_user(request):
+    user = request.user_object
+    serializer = UserSerializer(user)
+    return JsonResponse({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)

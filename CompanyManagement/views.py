@@ -185,3 +185,11 @@ def leave_company(request):
 
             # 如果不是POST请求，返回错误响应
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+@api_view(['GET'])
+@require_company
+def get_company(request):
+    cp = request.company_object
+    serializer = CompanySerializer(cp)
+    return JsonResponse({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
