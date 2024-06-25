@@ -13,14 +13,15 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 import random
 import json
-
+from UserManagement.serializers import UserSerializer
 from UserManagement.models import User, VerificationCode
-# from TeamManagement.serializers import UserSerializer
-# from shared.decorators import require_user
-# from shared.utils.TeamManage.users import get_user_by_username, get_user_by_email
-# from shared.utils.email import send_email
+from shared.decorators import require_user
+from shared.utils.UserManage.users import get_user_by_username, get_user_by_email
+from shared.utils.email import send_email
 import shutil
 import os
+
+from shared.utils.UserManage.users import get_user_by_email
 
 
 class UserCURDViewSet(viewsets.ModelViewSet):
@@ -84,14 +85,6 @@ def register(request):
     verification_code.delete()
     new_user = User(password=hashed_password, username=username, real_name=real_name, email=email)
     new_user.save()
-
-    default_avatar_path = 'resources/avatars/default_avatar.png'
-    with open(default_avatar_path, 'rb') as f:
-        avatar_content = f.read()
-    new_filename = f"{username}_avatar.png"
-    new_file = ContentFile(avatar_content)
-    new_file.name = new_filename
-    new_user.avatar.save(new_filename, new_file, save=True)
 
     return JsonResponse({"status": "success", "message": "User successfully registered"},
                         status=status.HTTP_201_CREATED)
@@ -162,22 +155,6 @@ def update_user(request):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(['PUT'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@require_user
-def update_user_tutorial(request):
-    user = request.user_object
-    has_completed_tutorial = request.GET.get('has_completed_tutorial')
-    if not has_completed_tutorial:
-        return JsonResponse({"status": "error", "message": "has_completed_tutorial are required"},
-                            status=status.HTTP_400_BAD_REQUEST)
-    user.has_completed_tutorial = has_completed_tutorial
-    user.save()
-    return JsonResponse({"status": "success", "message": "Tutorial status updated successfully"},
-                        status=status.HTTP_200_OK)
-
-
 @csrf_exempt
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -189,31 +166,31 @@ def get_user(request):
     return JsonResponse({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
 
 
-@csrf_exempt
-@api_view(['PUT'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def set_user_avatar(request):
-    try:
-        # 从请求中获取文件
-        avatar = request.FILES.get('avatar', None)
-        if not avatar:
-            return JsonResponse({"status": "error", "message": "No avatar file provided"},
-                                status=status.HTTP_400_BAD_REQUEST)
-        # 获取用户
-        user = User.objects.get(username=request.user.username)
-        # 删除旧的头像文件，如果存在的话
-        if user.avatar:
-            with Lock(user.avatar.path, 'r+b'):
-                user.avatar.delete(save=False)
-        # 创建新的头像文件名
-        new_filename = f"{user.username}_avatar.png"
-        # 读取和保存新文件
-        new_file = ContentFile(avatar.read())
-        new_file.name = new_filename
-        # 保存新的头像
-        user.avatar.save(new_filename, new_file, save=True)
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"},
-                            status=status.HTTP_400_BAD_REQUEST)
-    return JsonResponse({"status": "success", "message": "Avatar updated successfully"}, status=status.HTTP_200_OK)
+# @csrf_exempt
+# @api_view(['PUT'])
+# @authentication_classes([TokenAuthentication])
+# @permission_classes([IsAuthenticated])
+# def set_user_avatar(request):
+#     try:
+#         # 从请求中获取文件
+#         avatar = request.FILES.get('avatar', None)
+#         if not avatar:
+#             return JsonResponse({"status": "error", "message": "No avatar file provided"},
+#                                 status=status.HTTP_400_BAD_REQUEST)
+#         # 获取用户
+#         user = User.objects.get(username=request.user.username)
+#         # 删除旧的头像文件，如果存在的话
+#         if user.avatar:
+#             with Lock(user.avatar.path, 'r+b'):
+#                 user.avatar.delete(save=False)
+#         # 创建新的头像文件名
+#         new_filename = f"{user.username}_avatar.png"
+#         # 读取和保存新文件
+#         new_file = ContentFile(avatar.read())
+#         new_file.name = new_filename
+#         # 保存新的头像
+#         user.avatar.save(new_filename, new_file, save=True)
+#     except Exception as e:
+#         return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"},
+#                             status=status.HTTP_400_BAD_REQUEST)
+#     return JsonResponse({"status": "success", "message": "Avatar updated successfully"}, status=status.HTTP_200_OK)

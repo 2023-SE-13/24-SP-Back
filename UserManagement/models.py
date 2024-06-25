@@ -3,7 +3,6 @@ from django.db import models
 from shared.utils.datetime import get_expiry_time
 
 
-# Create your models here.
 class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True, primary_key=True)
     real_name = models.CharField(max_length=255)
