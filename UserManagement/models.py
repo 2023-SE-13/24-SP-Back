@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from shared.utils.datetime import get_expiry_time
-from CompanyManagement.models import Company
 
 
 class User(AbstractUser):
@@ -25,7 +24,4 @@ class VerificationCode(models.Model):
         return self.email
 
 
-class JoinVerification(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+

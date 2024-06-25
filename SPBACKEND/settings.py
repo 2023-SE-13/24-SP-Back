@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'UserManagement.apps.UserManagementConfig',
     'Subscribe',
+    'CompanyManagement.apps.CompanyManagementConfig',
 ]
 
 MIDDLEWARE = [

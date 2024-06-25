@@ -33,7 +33,7 @@ class CompanyMember(models.Model):
     role = models.CharField(
         max_length=255,
         choices=ROLE_TYPE_CHOICES,
-        default='Member',
+        default='Staff',
     )
 
     class Meta:
@@ -44,3 +44,7 @@ class CompanyMember(models.Model):
         return f"{self.company} - {self.user} ({self.get_role_display()})"
 
 
+class JoinVerification(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
