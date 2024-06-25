@@ -1,15 +1,35 @@
 import json
 
-from django.core.files import ContentFile
+from django.core.files.base import ContentFile
 from django.http import JsonResponse
 from django.shortcuts import render
-from rest_framework import status
+from rest_framework import status, viewsets
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
 
 from CompanyManagement.models import Company, CompanyMember
+from CompanyManagement.serializer import CompanySerializer, CompanyMemberUserSerializer
+from UserManagement.models import User
 
 
 # Create your views here.
+
+class CompanyCURDViewSet(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = User.objects.all()
+    serializer_class = CompanySerializer
+
+
+class CompanyMemberCURDViewSet(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    queryset = CompanyMember.objects.all()
+    serializer_class = CompanyMemberUserSerializer
+
+
 @api_view(['PUT'])
 def create_company(request):
     data = json.loads(request.body.decode('utf-8'))
@@ -22,7 +42,8 @@ def create_company(request):
 
     company = Company.objects.filter(company_name=company_name)
     if company.exists():
-        return JsonResponse({"status": "error", "message": "Company name already exists"}, status=status.HTTP_409_CONFLICT)
+        return JsonResponse({"status": "error", "message": "Company name already exists"},
+                            status=status.HTTP_409_CONFLICT)
 
     company = Company(company_name=company_name, company_description=company_description)
     company.save()
