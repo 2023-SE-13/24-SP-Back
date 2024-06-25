@@ -357,4 +357,4 @@ cython_debug/
 
 */migrations/*
 
-
+backend_restart_server.sh
