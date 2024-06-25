@@ -10,9 +10,9 @@ router.register(r'company_members', CompanyMemberCURDViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('/create_company', create_company),
-    path('/send_join_verification', send_join_verification),
-    path('/accept_join_verification', accept_join_verification),
+    path('create_company', create_company),
+    path('send_join_verification', send_join_verification),
+    path('accept_join_verification', accept_join_verification),
 
     # path('remove_company_member', remove_company_member),
     # path('get_member_role', get_user_role_in_company),
