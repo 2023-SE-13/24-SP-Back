@@ -123,7 +123,7 @@ def send_join_verification(request):
         return JsonResponse({"status": "error", "message": "You are not a member of this company"},
                             status=status.HTTP_403_FORBIDDEN)
     # 检查欲添加用户是否已是企业成员
-    if current_user.is_staff:
+    if user_to_add.is_staff:
         return JsonResponse({"status": "error", "message": "User is already a member of this company"},
                             status=status.HTTP_400_BAD_REQUEST)
     # 发送加入验证
