@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-0uq@0s$whr&fd-%!%@m+c(_t=#(0#^ft_r+bx$u08g1v_io#r3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.251.253.188']
 
 
 # Application definition
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'UserManagement.apps.UserManagementConfig',
 ]
 
 MIDDLEWARE = [
@@ -76,8 +77,12 @@ WSGI_APPLICATION = 'SPBACKEND.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'sp',
+        'USER': 'sp',
+        'PASSWORD': 'KZtnN5JK4XW8D5RN',
+        'HOST': '10.251.253.188',
+        'PORT': '3306',
     }
 }
 
