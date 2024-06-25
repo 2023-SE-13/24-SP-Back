@@ -130,3 +130,18 @@ def send_join_verification(request):
     # create_notification(json_str)
     return JsonResponse({'status': 'success', "message": "Join verification successfully send to user"},
                         status=status.HTTP_201_CREATED)
+
+
+@csrf_exempt
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@require_company
+@require_user
+def accept_join_verification(request):
+    current_user = request.user
+    company = request.company_object
+    # 用户点击加入企业按扭，发送请求到后端，后端调用此接口，将用户加入企业
+    CompanyMember.objects.create(company=company, user=current_user)
+    return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
+                        status=status.HTTP_201_CREATED)
