@@ -39,8 +39,12 @@ class CompanyMemberCURDViewSet(viewsets.ModelViewSet):
 @permission_classes([IsAuthenticated])
 def create_company(request):
     data = json.loads(request.body.decode('utf-8'))
+    current_user = request.user
     company_name = data.get('company_name')
     company_description = data.get('company_description')
+    if current_user.is_staff:
+        return JsonResponse({"status": "error", "message": "You are already a member of a company"},
+                            status=status.HTTP_400_BAD_REQUEST)
     if not company_name or not company_description:
         return JsonResponse(
             {"status": "error", "message": "company_name, company_description are required"},
