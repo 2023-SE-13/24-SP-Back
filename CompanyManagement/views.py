@@ -146,3 +146,36 @@ def accept_join_verification(request):
     CompanyMember.objects.create(company=company, user=current_user)
     return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
                         status=status.HTTP_201_CREATED)
+
+
+# 你可以使用require_http_methods装饰器来限制只接受POST请求
+@api_view(["POST"])
+@csrf_exempt
+def leave_company(request):
+    if request.method == 'POST':
+        # 尝试从请求体中读取JSON数据
+        try:
+            json_data = json.loads(request.body)
+            company_id = json_data.get('companyid')
+            user_id = json_data.get('userid')
+
+            if not company_id or not user_id:
+                return JsonResponse({'status': 'fail', 'message': 'Missing required fields'}, status=400)
+
+                # 尝试获取companymember对象
+            try:
+                member = CompanyMember.objects.get(companyid=company_id, userid=user_id)
+                # 如果找到了，则删除
+                member.delete()
+                # 返回成功的响应
+                return JsonResponse({'status': 'success'})
+            except CompanyMember.DoesNotExist:
+                # 如果没有找到，则返回失败的响应
+                return JsonResponse({'status': 'fail', 'message': 'Member not found'}, status=404)
+
+        except json.JSONDecodeError:
+            # 如果JSON解析失败，返回错误响应
+            return JsonResponse({'status': 'fail', 'message': 'Invalid JSON data'}, status=400)
+
+            # 如果不是POST请求，返回错误响应
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
