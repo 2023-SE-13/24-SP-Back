@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from shared.utils.datetime import get_expiry_time
-from CompanyManagement.models import Company
 
 
 class User(AbstractUser):
