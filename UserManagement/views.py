@@ -108,6 +108,20 @@ def get_verification_code(request):
 
     return JsonResponse({"status": "success", "message": "Verification code sent"}, status=status.HTTP_200_OK)
 
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def logout(request):
+    try:
+        # 获取当前用户的Token
+        token = Token.objects.get(user=request.user)
+        # 删除Token
+        token.delete()
+        return JsonResponse({"status": "success", "message": "Successfully logged out."}, status=status.HTTP_200_OK)
+    except Token.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Token not found."}, status=status.HTTP_400_BAD_REQUEST)
+
 #
 # @api_view(['PUT'])
 # @authentication_classes([TokenAuthentication])
