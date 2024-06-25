@@ -52,18 +52,20 @@ def create_company(request):
     company.save()
     company_id = company.id
     # 设置默认image
-    default_image_path = 'resources/company_images/default_image.png'
-    with open(default_image_path, 'rb') as f:
-        image_content = f.read()
-    new_filename = f"{company_id}_image.png"
-    new_file = ContentFile(image_content)
-    new_file.name = new_filename
-    company.company_image.save(new_filename, new_file, save=True)
+    # default_image_path = 'resources/company_images/default_image.png'
+    # with open(default_image_path, 'rb') as f:
+    #     image_content = f.read()
+    # new_filename = f"{company_id}_image.png"
+    # new_file = ContentFile(image_content)
+    # new_file.name = new_filename
+    # company.company_image.save(new_filename, new_file, save=True)
 
     # 将创建者加入Company
     user = request.user
     company_member = CompanyMember(company=company, user=user, role='Creator')
     company_member.save()
+    user.is_staff = True
+    user.save()
 
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 
@@ -118,7 +120,7 @@ def send_join_verification(request):
         return JsonResponse({"status": "error", "message": "You are not a member of this company"},
                             status=status.HTTP_403_FORBIDDEN)
     # 检查欲添加用户是否已是企业成员
-    if CompanyMember.objects.filter(company=company, user=user_to_add).exists():
+    if current_user.is_staff:
         return JsonResponse({"status": "error", "message": "User is already a member of this company"},
                             status=status.HTTP_400_BAD_REQUEST)
     # 发送加入验证
@@ -144,5 +146,7 @@ def accept_join_verification(request):
     company = request.company_object
     # 用户点击加入企业按扭，发送请求到后端，后端调用此接口，将用户加入企业
     CompanyMember.objects.create(company=company, user=current_user)
+    current_user.is_staff = True
+    current_user.save()
     return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
                         status=status.HTTP_201_CREATED)
