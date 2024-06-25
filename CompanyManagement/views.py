@@ -11,7 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from CompanyManagement.models import Company, CompanyMember
 from CompanyManagement.serializer import CompanySerializer, CompanyMemberUserSerializer
-from UserManagement.models import User, JoinVerification
+from UserManagement.models import User
+from CompanyManagement.models import JoinVerification
 from shared.decorators import require_user, require_company
 
 
