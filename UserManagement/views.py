@@ -87,7 +87,7 @@ def register(request):
     new_user.save()
 
     return JsonResponse({"status": "success", "message": "User successfully registered"},
-                        status=status.HTTP_201_CREATED)
+                        status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
