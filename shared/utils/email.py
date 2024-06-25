@@ -9,10 +9,10 @@ def send_email(email, code):
     from email.header import Header
 
     # 配置SMTP服务器和端口
-    smtp_server = os.getenv('SMTP_SERVER')
-    smtp_port = int(os.getenv('SMTP_PORT'))  # 确保这是一个整数
-    smtp_user = os.getenv('SMTP_USER')
-    smtp_pass = os.getenv('SMTP_PASS')
+    smtp_server = 'smtp.163.com'
+    smtp_port = 465  # 确保这是一个整数
+    smtp_user = 'judgement9259@163.com'
+    smtp_pass = 'NNCABGNHANCKJOCK'
 
     # 创建SMTP对象
     server = smtplib.SMTP_SSL(smtp_server, smtp_port)
