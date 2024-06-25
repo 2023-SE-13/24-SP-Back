@@ -5,14 +5,13 @@ from .views import *
 
 # 创建一个 router 并注册 ViewSet
 router = DefaultRouter()
-router.register(r'companys', TeamCURDViewSet)
-router.register(r'company_members', TeamMemberCURDViewSet)
+router.register(r'companys', CompanyCURDViewSet)
+router.register(r'company_members', CompanyMemberCURDViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
-    
     path('create_company', create_company),
-    # path('add_company_member', add_company_member),
+    path('send_join_verification', send_join_verification),
     # path('remove_company_member', remove_company_member),
     # path('get_member_role', get_user_role_in_company),
     # path('set_member_role', set_company_member_role),
