@@ -158,26 +158,26 @@ def accept_join_verification(request):
 @csrf_exempt
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@require_company
+@require_user
 def leave_company(request):
     if request.method == 'POST':
         # 尝试从请求体中读取JSON数据
         try:
-            json_data = json.loads(request.body)
-            company_id = json_data.get('company_id')
-            user_id = json_data.get('user_id')
+            company = request.company_object
+            user = request.user_object
 
-            if not company_id or not user_id:
-                return JsonResponse({'status': 'fail', 'message': 'Missing required fields'}, status=400)
+            # if not company or not user:
+            #     return JsonResponse({'status': 'fail', 'message': 'Missing required fields'}, status=400)
 
                 # 尝试获取companymember对象
             try:
-                member = CompanyMember.objects.get(company_id=company_id, user_id=user_id)
+                member = CompanyMember.objects.get(company=company, user=user)
                 # 如果找到了，则删除
                 member.delete()
 
-                user_manage_obj = User.objects.get(username=user_id)  # 假设UserManage有一个user_id字段
-                user_manage_obj.is_staff = 0  # 或者如果is_staff是布尔字段，可以使用 user_manage_obj.is_staff = False
-                user_manage_obj.save()  # 保存更改
+                user.is_staff = 0  # 或者如果is_staff是布尔字段，可以使用 user_manage_obj.is_staff = False
+                user.save()  # 保存更改
                 # 返回成功的响应
                 return JsonResponse({'status': 'success'})
             except CompanyMember.DoesNotExist:
