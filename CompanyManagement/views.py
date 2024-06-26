@@ -241,3 +241,12 @@ def search_company(request):
             query |= Q(**{f'{field}__icontains': keyword})
     results = Company.objects.filter(query).values()
     return JsonResponse({"status": "success", "data": CompanySerializer(results, many=True).data}, status=status.HTTP_200_OK)
+
+@csrf_exempt
+@api_view(['GET'])
+@require_company
+def get_staff(request):
+    company = request.company_object
+    staff = CompanyMember.objects.filter(company=company)
+    return JsonResponse({"status": "success", "data": CompanyMemberUserSerializer(staff, many=True).data}, status=status.HTTP_200_OK)
+
