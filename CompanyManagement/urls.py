@@ -14,13 +14,14 @@ urlpatterns = [
     path('send_join_verification', send_join_verification),
     path('accept_join_verification', accept_join_verification),
     path('leave_company', leave_company),
+    path('get_company', get_company),
     path('search_company', search_company),
     # path('remove_company_member', remove_company_member),
     # path('get_member_role', get_user_role_in_company),
     # path('set_member_role', set_company_member_role),
     # path('get_company_members', get_company_members),
     # path('get_companys', get_user_companys),
-    # path('get_company', get_company),
+
     # path('set_company_image', set_company_image),
     #
     # path('create_public_group', chat_views.create_public_group),
