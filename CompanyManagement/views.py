@@ -105,6 +105,25 @@ def add_company_member(request):
     return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
                         status=status.HTTP_201_CREATED)
 
+@csrf_exempt
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@require_company
+@require_user
+def delete_staff(request):
+    current_user = request.user
+    company = request.company_object
+    if CompanyMember.objects.get(company=company, user=current_user).role != ('Creator' or 'Admin'):
+        return JsonResponse({"status": "error", "message": "You have no permission to delete staff"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    user_to_delete = request.user_object
+    if CompanyMember.objects.filter(company=company, user=user_to_delete).exists():
+        CompanyMember.objects.get(company=company, user=user_to_delete).delete()
+        user_to_delete.is_staff = False
+        user_to_delete.save()
+        return JsonResponse({'status': 'success', "message": "User successfully deleted from the company"},
+                            status=status.HTTP_200_OK)
 
 @csrf_exempt
 @api_view(['POST'])
@@ -154,7 +173,6 @@ def accept_join_verification(request):
     JoinVerification.objects.get(company=company, user=current_user).delete()
     return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
                         status=status.HTTP_201_CREATED)
-
 
 
 @api_view(["POST"])
