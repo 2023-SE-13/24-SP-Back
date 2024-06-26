@@ -48,7 +48,7 @@ def create_company(request):
     if not company_name or not company_description:
         return JsonResponse(
             {"status": "error", "message": "company_name, company_description are required"},
-            status=status.HTTP_400_BAD_REQUEST)
+            status=status.HTTP_406_NOT_ACCEPTABLE)
 
     company = Company.objects.filter(company_name=company_name)
     if company.exists():
@@ -231,7 +231,7 @@ def get_company(request):
 @api_view(['POST'])
 def search_company(request):
     data = json.loads(request.body.decode('utf-8'))
-    keywords = data.get('keywords', None).spilt()
+    keywords = data.get('keywords', None).split()
     query = Q()
     if not keywords:
         return JsonResponse({"status": "error", "message": "keyword is required"}, status=status.HTTP_400_BAD_REQUEST)
