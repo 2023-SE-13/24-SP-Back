@@ -12,6 +12,7 @@ class User(AbstractUser):
     blog_link = models.CharField(max_length=255, null=True)
     repository_link = models.CharField(max_length=255, null=True)
 
+
     class Meta:
         db_table = 'Users'
 

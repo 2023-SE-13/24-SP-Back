@@ -32,12 +32,11 @@ class Subscribe_companyCURDViewSet(viewsets.ModelViewSet):
 @csrf_exempt
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-@require_user
 @require_company
 def subscribe_company(request):
     if request.method == 'POST':
         company = request.company_object
-        user = request.user_object
+        user = request.user
         if not Subscribe_company.objects.filter(company=company, user=user).exists():
             subscribe = Subscribe_company(company=company,user=user)
             company.company_subscription = company.company_subscription + 1
@@ -52,14 +51,11 @@ def subscribe_company(request):
 @csrf_exempt
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-@require_user
 @require_company
 def unsubscribe_company(request):
     if request.method == 'DELETE':
         company = request.company_object
-        user = request.user_object
-        print(company)
-        print(user)
+        user = request.user
         if Subscribe_company.objects.filter(company=company, user=user).exists():
             subscribe = Subscribe_company.objects.get(company=company,user=user)
             company.company_subscription = company.company_subscription - 1
