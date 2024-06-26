@@ -1,5 +1,6 @@
 import json
 from django.core.files.base import ContentFile
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -211,3 +212,14 @@ def leave_company(request):
 
             # 如果不是POST请求，返回错误响应
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
+
+
+@csrf_exempt
+@api_view(['POST'])
+def search_comany(request):
+    data = json.loads(request.body.decode('utf-8'))
+    keyword = data.get('keyword')
+    if not keyword:
+        return JsonResponse({"status": "error", "message": "keyword is required"}, status=status.HTTP_400_BAD_REQUEST)
+    companies = Company.objects.filter(Q(company_name__icontains=keyword) | Q(company_description__icontains=keyword))
+    return JsonResponse({"status": "success", "data": CompanySerializer(companies, many=True).data}, status=status.HTTP_200_OK)
