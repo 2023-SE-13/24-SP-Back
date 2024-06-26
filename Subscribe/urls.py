@@ -11,4 +11,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('subscribe_company', views.subscribe_company, name='subscribe_company'),
     path('subscribe_user', views.subscribe_user, name='subscribe_user'),
+    path('unsubscribe_company', views.unsubscribe_company, name='unsubscribe_company'),
+    path('unsubscribe_user', views.unsubscribe_user, name='unsubscribe_user'),
 ]

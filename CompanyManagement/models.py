@@ -13,7 +13,7 @@ class Company(models.Model):
     company_name = models.CharField(max_length=255)
     company_description = models.CharField(max_length=255)
     company_image = models.ImageField(upload_to='resources/company_images/', null=True, blank=True)
-
+    company_subscription = models.IntegerField(default=0)
     class Meta:
         db_table = 'Companys'
 

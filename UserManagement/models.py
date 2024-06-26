@@ -6,7 +6,7 @@ from shared.utils.datetime import get_expiry_time
 class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True, primary_key=True)
     real_name = models.CharField(max_length=255)
-
+    user_subscription = models.IntegerField(default=0)
     class Meta:
         db_table = 'Users'
 
