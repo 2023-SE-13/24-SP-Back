@@ -63,6 +63,7 @@ def create_company(request):
     # company.company_image.save(new_filename, new_file, save=True)
 
     # 将创建者加入Company
+
     user = request.user
     company_member = CompanyMember(company=company, user=user, role='Creator')
     company_member.save()
@@ -149,6 +150,8 @@ def accept_join_verification(request):
     CompanyMember.objects.create(company=company, user=current_user)
     current_user.is_staff = True
     current_user.save()
+    # 用户同意后删除加入验证
+    JoinVerification.objects.get(company=company, user=current_user).delete()
     return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
                         status=status.HTTP_201_CREATED)
 
