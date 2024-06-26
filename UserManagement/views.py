@@ -223,61 +223,33 @@ def search_users(request):
         # 如果没有提供关键词，则返回所有用户
         users = User.objects.all()
 
-    # 将用户数据转换为 JSON 格式并返回
-    user_data = [{
-        "username": user.username,
-        "real_name": user.real_name,
-        "education": user.education,
-        "desired_position": user.desired_position,
-        "blog_link": user.blog_link,
-        "repository_link": user.repository_link
-    } for user in users]
+    users = users.prefetch_related('companymember_set__company')
+
+    # 构建响应数据
+    user_data = []
+    for user in users:
+        company_members = user.companymember_set.all()
+        if company_members:
+            company_member = company_members.first()
+            company = company_member.company
+            company_id = str(company.company_id) if company else ''
+            company_name = company.company_name if company else ''
+        else:
+            company_id = ''
+            company_name = ''
+
+        user_data.append({
+            "username": user.username,
+            "real_name": user.real_name,
+            "education": user.education,
+            "desired_position": user.desired_position,
+            "blog_link": user.blog_link,
+            "repository_link": user.repository_link,
+            "company_id": company_id,
+            "company_name": company_name,
+        })
 
     return JsonResponse(user_data, safe=False)
-# def search_users(keyword):
-#     with connection.cursor() as cursor:
-#         # 明确指定查询字段，这些字段需要与 User 模型的字段一致
-#         sql = """
-#         SELECT username, real_name, education, desired_position, blog_link, repository_link
-#         FROM Users
-#         WHERE MATCH(real_name, desired_position) AGAINST(%s IN NATURAL LANGUAGE MODE)
-#         """
-#         cursor.execute(sql, [keyword])
-#         result_list = cursor.fetchall()
-#
-#     # 创建 User 模型实例
-#     # 确保查询返回的列顺序与下面的顺序一致
-#     users = [User(username=row[0], real_name=row[1], education=row[2], desired_position=row[3], blog_link=row[4], repository_link=row[5]) for row in result_list]
-#     return users
 
-
-# @csrf_exempt
-# @api_view(['PUT'])
-# @authentication_classes([TokenAuthentication])
-# @permission_classes([IsAuthenticated])
-# def set_user_avatar(request):
-#     try:
-#         # 从请求中获取文件
-#         avatar = request.FILES.get('avatar', None)
-#         if not avatar:
-#             return JsonResponse({"status": "error", "message": "No avatar file provided"},
-#                                 status=status.HTTP_400_BAD_REQUEST)
-#         # 获取用户
-#         user = User.objects.get(username=request.user.username)
-#         # 删除旧的头像文件，如果存在的话
-#         if user.avatar:
-#             with Lock(user.avatar.path, 'r+b'):
-#                 user.avatar.delete(save=False)
-#         # 创建新的头像文件名
-#         new_filename = f"{user.username}_avatar.png"
-#         # 读取和保存新文件
-#         new_file = ContentFile(avatar.read())
-#         new_file.name = new_filename
-#         # 保存新的头像
-#         user.avatar.save(new_filename, new_file, save=True)
-#     except Exception as e:
-#         return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"},
-#                             status=status.HTTP_400_BAD_REQUEST)
-#     return JsonResponse({"status": "success", "message": "Avatar updated successfully"}, status=status.HTTP_200_OK)
 
 
