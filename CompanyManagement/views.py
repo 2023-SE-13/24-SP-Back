@@ -187,26 +187,29 @@ def accept_join_verification(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @require_company
-@require_user
 def leave_company(request):
     if request.method == 'POST':
         # 尝试从请求体中读取JSON数据
         try:
             company = request.company_object
-            user = request.user_object
+            user = request.user
 
             # if not company or not user:
             #     return JsonResponse({'status': 'fail', 'message': 'Missing required fields'}, status=400)
 
             # 尝试获取companymember对象
             try:
-                member = CompanyMember.objects.get(company=company, user=user)
-                # 如果找到了，则删除
-                member.delete()
 
-                user.is_staff = 0  # 或者如果is_staff是布尔字段，可以使用 user_manage_obj.is_staff = False
-                user.save()  # 保存更改
+                member = CompanyMember.objects.get(company=company, user=user)
+                if member.role != ('Creator'):
+                    # 如果找到了，则删除
+                    member.delete()
+
+                    user.is_staff = 0  # 或者如果is_staff是布尔字段，可以使用 user_manage_obj.is_staff = False
+                    user.save()  # 保存更改
                 # 返回成功的响应
+                else:
+                    return JsonResponse({'status': 'fail', 'message': 'You are Creator!'}, status=405)
                 return JsonResponse({'status': 'success'})
             except CompanyMember.DoesNotExist:
                 # 如果没有找到，则返回失败的响应
