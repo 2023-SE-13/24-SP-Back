@@ -216,10 +216,15 @@ def leave_company(request):
 
 @csrf_exempt
 @api_view(['POST'])
-def search_comany(request):
+def search_company(request):
     data = json.loads(request.body.decode('utf-8'))
-    keyword = data.get('keyword')
-    if not keyword:
+    keywords = data.get('keywords', None).spilt()
+    query = Q()
+    if not keywords:
         return JsonResponse({"status": "error", "message": "keyword is required"}, status=status.HTTP_400_BAD_REQUEST)
-    companies = Company.objects.filter(Q(company_name__icontains=keyword) | Q(company_description__icontains=keyword))
-    return JsonResponse({"status": "success", "data": CompanySerializer(companies, many=True).data}, status=status.HTTP_200_OK)
+
+    for keyword in keywords:
+        for field in ['company_name', 'company_description']:
+            query |= Q(**{f'{field}__icontains': keyword})
+    results = Company.objects.filter(query).values()
+    return JsonResponse({"status": "success", "data": CompanySerializer(results, many=True).data}, status=status.HTTP_200_OK)
