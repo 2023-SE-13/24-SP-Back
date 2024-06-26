@@ -16,7 +16,5 @@ urlpatterns = [
     path('update_user', views.update_user),
     path('forget_password', views.forget_password),
     path('search_users', views.search_users)
-    # path('update_user', views.update_user),
 
-    # path('upload_avatar', views.set_user_avatar)
 ]
