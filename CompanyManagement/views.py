@@ -179,14 +179,13 @@ def accept_join_verification(request):
 @csrf_exempt
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-@require_company
 def leave_company(request):
     if request.method == 'POST':
         # 尝试从请求体中读取JSON数据
         try:
             json_data = json.loads(request.body)
-            company_id = json_data.get('companyid')
-            user_id = json_data.get('userid')
+            company_id = json_data.get('company_id')
+            user_id = json_data.get('user_id')
 
             if not company_id or not user_id:
                 return JsonResponse({'status': 'fail', 'message': 'Missing required fields'}, status=400)
