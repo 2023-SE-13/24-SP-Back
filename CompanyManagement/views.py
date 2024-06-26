@@ -1,5 +1,4 @@
 import json
-
 from django.core.files.base import ContentFile
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -158,9 +157,12 @@ def accept_join_verification(request):
                         status=status.HTTP_201_CREATED)
 
 
-# 你可以使用require_http_methods装饰器来限制只接受POST请求
+
 @api_view(["POST"])
 @csrf_exempt
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@require_company
 def leave_company(request):
     if request.method == 'POST':
         # 尝试从请求体中读取JSON数据
@@ -174,9 +176,13 @@ def leave_company(request):
 
                 # 尝试获取companymember对象
             try:
-                member = CompanyMember.objects.get(companyid=company_id, userid=user_id)
+                member = CompanyMember.objects.get(company_id=company_id, user_id=user_id)
                 # 如果找到了，则删除
                 member.delete()
+
+                user_manage_obj = User.objects.get(username=user_id)  # 假设UserManage有一个user_id字段
+                user_manage_obj.is_staff = 0  # 或者如果is_staff是布尔字段，可以使用 user_manage_obj.is_staff = False
+                user_manage_obj.save()  # 保存更改
                 # 返回成功的响应
                 return JsonResponse({'status': 'success'})
             except CompanyMember.DoesNotExist:

@@ -6,7 +6,7 @@ from .models import Subscribe_company
 class SubscribeCompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscribe_company
-        fields = ['userid', 'companyid', 'createtime']
+        fields = ['user', 'company']
 
     def create(self, validated_data):
         # 如果createtime不由Django自动生成，你可以在这里设置它
@@ -16,7 +16,7 @@ class SubscribeCompanySerializer(serializers.ModelSerializer):
 class SubscribeUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscribe_user
-        fields = ['user_src_id', 'user_dst_id', 'createtime']
+        fields = ['user_src', 'user_dst']
 
     def create(self, validated_data):
         # 如果createtime不由Django自动生成，你可以在这里设置它
