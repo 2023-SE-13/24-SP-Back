@@ -110,6 +110,7 @@ def add_company_member(request):
     return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
                         status=status.HTTP_201_CREATED)
 
+
 @csrf_exempt
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
@@ -129,6 +130,7 @@ def delete_staff(request):
         user_to_delete.save()
         return JsonResponse({'status': 'success', "message": "User successfully deleted from the company"},
                             status=status.HTTP_200_OK)
+
 
 @csrf_exempt
 @api_view(['POST'])
@@ -196,7 +198,7 @@ def leave_company(request):
             # if not company or not user:
             #     return JsonResponse({'status': 'fail', 'message': 'Missing required fields'}, status=400)
 
-                # 尝试获取companymember对象
+            # 尝试获取companymember对象
             try:
                 member = CompanyMember.objects.get(company=company, user=user)
                 # 如果找到了，则删除
@@ -217,6 +219,7 @@ def leave_company(request):
             # 如果不是POST请求，返回错误响应
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
+
 @csrf_exempt
 @api_view(['GET'])
 @require_company
@@ -224,7 +227,6 @@ def get_company(request):
     cp = request.company_object
     serializer = CompanySerializer(cp)
     return JsonResponse({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
-
 
 
 @csrf_exempt
@@ -240,7 +242,9 @@ def search_company(request):
         for field in ['company_name', 'company_description']:
             query |= Q(**{f'{field}__icontains': keyword})
     results = Company.objects.filter(query).values()
-    return JsonResponse({"status": "success", "data": CompanySerializer(results, many=True).data}, status=status.HTTP_200_OK)
+    return JsonResponse({"status": "success", "data": CompanySerializer(results, many=True).data},
+                        status=status.HTTP_200_OK)
+
 
 @csrf_exempt
 @api_view(['GET'])
@@ -248,5 +252,33 @@ def search_company(request):
 def get_staff(request):
     company = request.company_object
     staff = CompanyMember.objects.filter(company=company)
-    return JsonResponse({"status": "success", "data": CompanyMemberUserSerializer(staff, many=True).data}, status=status.HTTP_200_OK)
+    return JsonResponse({"status": "success", "data": CompanyMemberUserSerializer(staff, many=True).data},
+                        status=status.HTTP_200_OK)
 
+
+@csrf_exempt
+@api_view(['POST'])
+@require_company
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def is_staff(request):
+    company = request.company_object
+    user = request.user
+    if CompanyMember.objects.filter(company=company, user=user).exists():
+        return JsonResponse({"status": "success"}, status=status.HTTP_200_OK)
+    else:
+        return JsonResponse({"status": "error"}, status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(['POST'])
+@require_company
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def is_to_join(request):
+    company = request.company_object
+    user = request.user
+    if JoinVerification.objects.filter(company=company, user=user).exists():
+        return JsonResponse({"status": "y"}, status=status.HTTP_200_OK)
+    else:
+        return JsonResponse({"status": "n"}, status=status.HTTP_200_OK)

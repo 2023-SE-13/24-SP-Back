@@ -17,6 +17,8 @@ urlpatterns = [
     path('get_company', get_company),
     path('get_staff', get_staff),
     path('search_company', search_company),
+    path('is_staff', is_staff),
+    path('is_to_join', is_to_join),
     # path('remove_company_member', remove_company_member),
     # path('get_member_role', get_user_role_in_company),
     # path('set_member_role', set_company_member_role),
