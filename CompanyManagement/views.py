@@ -1,5 +1,6 @@
 import json
 from django.core.files.base import ContentFile
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -47,7 +48,7 @@ def create_company(request):
     if not company_name or not company_description:
         return JsonResponse(
             {"status": "error", "message": "company_name, company_description are required"},
-            status=status.HTTP_400_BAD_REQUEST)
+            status=status.HTTP_406_NOT_ACCEPTABLE)
 
     company = Company.objects.filter(company_name=company_name)
     if company.exists():
@@ -67,6 +68,7 @@ def create_company(request):
     # company.company_image.save(new_filename, new_file, save=True)
 
     # 将创建者加入Company
+
     user = request.user
     company_member = CompanyMember(company=company, user=user, role='Creator')
     company_member.save()
@@ -108,6 +110,25 @@ def add_company_member(request):
     return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
                         status=status.HTTP_201_CREATED)
 
+@csrf_exempt
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@require_company
+@require_user
+def delete_staff(request):
+    current_user = request.user
+    company = request.company_object
+    if CompanyMember.objects.get(company=company, user=current_user).role != ('Creator' or 'Admin'):
+        return JsonResponse({"status": "error", "message": "You have no permission to delete staff"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    user_to_delete = request.user_object
+    if CompanyMember.objects.filter(company=company, user=user_to_delete).exists():
+        CompanyMember.objects.get(company=company, user=user_to_delete).delete()
+        user_to_delete.is_staff = False
+        user_to_delete.save()
+        return JsonResponse({'status': 'success', "message": "User successfully deleted from the company"},
+                            status=status.HTTP_200_OK)
 
 @csrf_exempt
 @api_view(['POST'])
@@ -153,9 +174,10 @@ def accept_join_verification(request):
     CompanyMember.objects.create(company=company, user=current_user)
     current_user.is_staff = True
     current_user.save()
+    # 用户同意后删除加入验证
+    JoinVerification.objects.get(company=company, user=current_user).delete()
     return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
                         status=status.HTTP_201_CREATED)
-
 
 
 @api_view(["POST"])
@@ -202,3 +224,20 @@ def get_company(request):
     cp = request.company_object
     serializer = CompanySerializer(cp)
     return JsonResponse({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+
+
+
+@csrf_exempt
+@api_view(['POST'])
+def search_company(request):
+    data = json.loads(request.body.decode('utf-8'))
+    keywords = data.get('keywords', None).split()
+    query = Q()
+    if not keywords:
+        return JsonResponse({"status": "error", "message": "keyword is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    for keyword in keywords:
+        for field in ['company_name', 'company_description']:
+            query |= Q(**{f'{field}__icontains': keyword})
+    results = Company.objects.filter(query).values()
+    return JsonResponse({"status": "success", "data": CompanySerializer(results, many=True).data}, status=status.HTTP_200_OK)
