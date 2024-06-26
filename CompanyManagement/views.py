@@ -57,15 +57,6 @@ def create_company(request):
 
     company = Company(company_name=company_name, company_description=company_description)
     company.save()
-    # company_id = company.company_id
-    # 设置默认image
-    # default_image_path = 'resources/company_images/default_image.png'
-    # with open(default_image_path, 'rb') as f:
-    #     image_content = f.read()
-    # new_filename = f"{company_id}_image.png"
-    # new_file = ContentFile(image_content)
-    # new_file.name = new_filename
-    # company.company_image.save(new_filename, new_file, save=True)
 
     # 将创建者加入Company
 
@@ -101,12 +92,6 @@ def add_company_member(request):
                             status=status.HTTP_400_BAD_REQUEST)
     # 添加用户到企业
     CompanyMember.objects.create(company=company, user=user_to_add)
-    # json_str = json.dumps({
-    #     "username": user_to_add.username,
-    #     "notification_type": "system",
-    #     "content": f"You have been added to the company {company.company_name} by {current_user.username}",
-    # })
-    # create_notification(json_str)
     return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
                         status=status.HTTP_201_CREATED)
 
@@ -154,12 +139,6 @@ def send_join_verification(request):
                             status=status.HTTP_400_BAD_REQUEST)
     # 发送加入验证
     JoinVerification.objects.create(company=company, user=user_to_add)
-    # json_str = json.dumps({
-    #     "username": user_to_add.username,
-    #     "notification_type": "system",
-    #     "content": f"You have been added to the company {company.company_name} by {current_user.username}",
-    # })
-    # create_notification(json_str)
     return JsonResponse({'status': 'success', "message": "Join verification successfully send to user"},
                         status=status.HTTP_201_CREATED)
 
@@ -194,9 +173,6 @@ def leave_company(request):
         try:
             company = request.company_object
             user = request.user_object
-
-            # if not company or not user:
-            #     return JsonResponse({'status': 'fail', 'message': 'Missing required fields'}, status=400)
 
             # 尝试获取companymember对象
             try:

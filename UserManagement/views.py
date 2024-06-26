@@ -171,29 +171,11 @@ def update_user(request):
 
     # 在这里进行实际的更新操作
     try:
-        # 更新密码
-        if data.get('password') is not None and not check_password(data.get('password'), current_user.password):
-            current_user.set_password(data.get('password'))
-        # 更新真实姓名
-        if data.get('real_name') is not None and data.get('real_name') != current_user.real_name:
-            current_user.real_name = data.get('real_name')
-        # 更新邮箱
-        if data.get('email') is not None and data.get('email') != current_user.email:
-            if get_user_by_email(data.get('email')):
-                return JsonResponse({"status": "error", "message": "Email already used"})
-            current_user.email = data.get('email')
-        # 更新教育经历
-        if data.get('education') is not None and data.get('education') != current_user.education:
-            current_user.education = data.get('education')
-        # 更新期望职位
-        if data.get('desired_position') is not None and data.get('desired_position') != current_user.desired_position:
-            current_user.desired_position = data.get('desired_position')
-        # 更新博客链接
-        if data.get('blog_link') is not None and data.get('blog_link') != current_user.blog_link:
-            current_user.blog_link = data.get('blog_link')
-        # 更新代码仓库链接
-        if data.get('repository_link') is not None and data.get('repository_link') != current_user.repository_link:
-            current_user.repository_link = data.get('repository_link')
+        fields_to_update = ['real_name', 'education', 'desired_position', 'blog_link', 'repository_link']
+
+        for field in fields_to_update:
+            if data.get(field) is not None and getattr(current_user, field) != data.get(field):
+                setattr(current_user, field, data.get(field))
         # 保存更改
         current_user.save()
         return JsonResponse({"status": "success", "message": "Profile updated successfully"}, status=status.HTTP_200_OK)
@@ -209,6 +191,7 @@ def get_user(request):
     user = request.user_object
     serializer = UserSerializer(user)
     return JsonResponse({'status': 'success', 'data': serializer.data}, status=status.HTTP_200_OK)
+
 
 @csrf_exempt
 @api_view(['GET'])
