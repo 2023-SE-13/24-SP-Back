@@ -9,12 +9,15 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -25,7 +28,7 @@ SECRET_KEY = 'django-insecure-0uq@0s$whr&fd-%!%@m+c(_t=#(0#^ft_r+bx$u08g1v_io#r3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '10.251.253.188']
+ALLOWED_HOSTS = ['localhost', os.getenv('LOCAL_HOST'), os.getenv('LOCAL_SERVER')]
 
 
 # Application definition
@@ -82,10 +85,10 @@ WSGI_APPLICATION = 'SPBACKEND.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sp',
-        'USER': 'sp',
-        'PASSWORD': 'KZtnN5JK4XW8D5RN',
-        'HOST': '10.251.253.188',
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': os.getenv('LOCAL_SERVER'),
         'PORT': '3306',
     }
 }
