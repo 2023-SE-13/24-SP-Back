@@ -66,13 +66,13 @@ def unsubscribe_company(request):
         return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
     return Response({'status': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-@api_view(['GET'])
+@api_view(['POST'])
 @csrf_exempt
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @require_company
 def do_subscribed_company(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
         user = request.user
         company = request.company_object
         if Subscribe_company.objects.filter(company=company, user=user).exists():
@@ -119,13 +119,13 @@ def unsubscribe_user(request):
         return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
     return Response({'status': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-@api_view(['GET'])
+@api_view(['POST'])
 @csrf_exempt
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @require_user
 def do_subscribed_user(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
         user_1 = request.user
         user_2 = request.user_object
         if Subscribe_user.objects.filter(user_src=user_1, user_dst=user_2).exists():
