@@ -122,51 +122,66 @@ def logout(request):
     except Token.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Token not found."}, status=status.HTTP_400_BAD_REQUEST)
 
-#
-# @api_view(['PUT'])
-# @authentication_classes([TokenAuthentication])
-# @permission_classes([IsAuthenticated])
-# def update_user(request):
-#     data = request.data  # 获取前端传入的JSON数据
-#
-#     # 获取通过Token验证的当前用户
-#     current_user = request.user
-#
-#     # 检查username是否与当前Token用户匹配
-#     if data.get("username") != current_user.username:
-#         return JsonResponse({"status": "error", "message": "You can only update your own profile"},
-#                             status=status.HTTP_401_UNAUTHORIZED)
-#
-#     verification_code = VerificationCode.objects.filter(email=current_user.email).order_by('-created_at').first()
-#
-#     if not verification_code or verification_code.code != data.get('code'):
-#         return JsonResponse({"status": "error", "message": "ERROR CODE"}, status=status.HTTP_401_UNAUTHORIZED)
-#
-#     if verification_code.expires_at < timezone.now():
-#         print(verification_code.expires_at)
-#         print(timezone.now())
-#         return JsonResponse({"status": "error", "message": "Verification code expired"},
-#                             status=status.HTTP_401_UNAUTHORIZED)
-#
-#     # 在这里进行实际的更新操作
-#     try:
-#         # 更新密码
-#         if not check_password(data.get('password'), current_user.password):
-#             current_user.set_password(data.get('password'))
-#         # 更新真实姓名
-#         if data.get('real_name') != current_user.real_name:
-#             current_user.real_name = data.get('real_name')
-#         # 更新邮箱
-#         if data.get('email') != current_user.email:
-#             if get_user_by_email(data.get('email')):
-#                 return JsonResponse({"status": "error", "message": "Email already used"})
-#             current_user.email = data.get('email')
-#         # 保存更改
-#         current_user.save()
-#         return JsonResponse({"status": "success", "message": "Profile updated successfully"}, status=status.HTTP_200_OK)
-#
-#     except Exception as e:
-#         return JsonResponse({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def update_user(request):
+    data = request.data  # 获取前端传入的JSON数据
+
+    # 获取通过Token验证的当前用户
+    current_user = request.user
+
+    # 检查username是否与当前Token用户匹配
+    if data.get("username") != current_user.username:
+        return JsonResponse({"status": "error", "message": "You can only update your own profile"},
+                            status=status.HTTP_401_UNAUTHORIZED)
+
+    if data.get('password') is not None:
+        verification_code = VerificationCode.objects.filter(email=current_user.email).order_by('-created_at').first()
+
+        if not verification_code or verification_code.code != data.get('code'):
+            return JsonResponse({"status": "error", "message": "ERROR CODE"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if verification_code.expires_at < timezone.now():
+            print(verification_code.expires_at)
+            print(timezone.now())
+            return JsonResponse({"status": "error", "message": "Verification code expired"},
+                                status=status.HTTP_401_UNAUTHORIZED)
+
+    # 在这里进行实际的更新操作
+    try:
+        # 更新密码
+        if not check_password(data.get('password'), current_user.password):
+            current_user.set_password(data.get('password'))
+        # 更新真实姓名
+        if data.get('real_name') != current_user.real_name:
+            current_user.real_name = data.get('real_name')
+        # 更新邮箱
+        if data.get('email') != current_user.email:
+            if get_user_by_email(data.get('email')):
+                return JsonResponse({"status": "error", "message": "Email already used"})
+            current_user.email = data.get('email')
+        # 更新教育经历
+        if data.get('education') != current_user.education:
+            current_user.education = data.get('education')
+        # 更新期望职位
+        if data.get('desired_position') != current_user.desired_position:
+            current_user.desired_position = data.get('desired_position')
+        # 更新博客链接
+        if data.get('blog_link') != current_user.blog_link:
+            current_user.blog_link = data.get('blog_link')
+        # 更新代码仓库链接
+        if data.get('repository_link') != current_user.repository_link:
+            current_user.repository_link = data.get('repository_link')
+        # 保存更改
+        current_user.save()
+        return JsonResponse({"status": "success", "message": "Profile updated successfully"}, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 #
 #
 # @csrf_exempt
