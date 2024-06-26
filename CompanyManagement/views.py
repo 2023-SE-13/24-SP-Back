@@ -176,8 +176,11 @@ def accept_join_verification(request):
     CompanyMember.objects.create(company=company, user=current_user)
     current_user.is_staff = True
     current_user.save()
-    # 用户同意后删除加入验证
-    JoinVerification.objects.get(company=company, user=current_user).delete()
+    try:
+        # 用户同意后删除加入验证
+        JoinVerification.objects.get(company=company, user=current_user).delete()
+    except JoinVerification.DoesNotExist:
+        return JsonResponse({'status': 'fail', 'message': 'Join verification not found'}, status=404)
     return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
                         status=status.HTTP_201_CREATED)
 
