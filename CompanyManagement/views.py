@@ -250,3 +250,18 @@ def get_staff(request):
     staff = CompanyMember.objects.filter(company=company)
     return JsonResponse({"status": "success", "data": CompanyMemberUserSerializer(staff, many=True).data}, status=status.HTTP_200_OK)
 
+@csrf_exempt
+@api_view(['POST'])
+@require_company
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def is_staff(request):
+    company = request.company_object
+    user = request.user
+    if CompanyMember.objects.filter(company=company,user=user).exists():
+        return JsonResponse({"status": "success"}, status=status.HTTP_200_OK)
+    else:
+        return JsonResponse({"status": "error"}, status=status.HTTP_200_OK)
+
+
+
