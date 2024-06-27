@@ -226,7 +226,7 @@ def search_users(request):
         # 如果没有提供关键词，则返回所有用户
         users = User.objects.all()
     user_data = []
-    for user in users
+    for user in users:
         company_member = CompanyMember.objects.filter(user=request.user).first()
         company_name = company_member.company.company_name if company_member else ""
         # 将用户数据转换为 JSON 格式并返回
