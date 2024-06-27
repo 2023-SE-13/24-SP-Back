@@ -14,6 +14,8 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 import random
 import json
+
+from CompanyManagement.models import CompanyMember
 from UserManagement.serializers import UserSerializer
 from UserManagement.models import User, VerificationCode
 from shared.decorators import require_user
@@ -124,6 +126,7 @@ def logout(request):
     except Token.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Token not found."}, status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['PUT'])
 @require_user
 @csrf_exempt
@@ -145,7 +148,6 @@ def forget_password(request):
     user.set_password(data.get('password'))
     user.save()
     return JsonResponse({"status": "success", "message": "Password updated successfully"}, status=status.HTTP_200_OK)
-
 
 
 @api_view(['PUT'])
@@ -171,11 +173,29 @@ def update_user(request):
 
     # 在这里进行实际的更新操作
     try:
-        fields_to_update = ['real_name', 'education', 'desired_position', 'blog_link', 'repository_link']
-
-        for field in fields_to_update:
-            if data.get(field) is not None and getattr(current_user, field) != data.get(field):
-                setattr(current_user, field, data.get(field))
+        # 更新密码
+        if data.get('password') is not None and not check_password(data.get('password'), current_user.password):
+            current_user.set_password(data.get('password'))
+        # 更新真实姓名
+        if data.get('real_name') is not None and data.get('real_name') != current_user.real_name:
+            current_user.real_name = data.get('real_name')
+        # 更新邮箱
+        if data.get('email') is not None and data.get('email') != current_user.email:
+            if get_user_by_email(data.get('email')):
+                return JsonResponse({"status": "error", "message": "Email already used"})
+            current_user.email = data.get('email')
+        # 更新教育经历
+        if data.get('education') is not None and data.get('education') != current_user.education:
+            current_user.education = data.get('education')
+        # 更新期望职位
+        if data.get('desired_position') is not None and data.get('desired_position') != current_user.desired_position:
+            current_user.desired_position = data.get('desired_position')
+        # 更新博客链接
+        if data.get('blog_link') is not None and data.get('blog_link') != current_user.blog_link:
+            current_user.blog_link = data.get('blog_link')
+        # 更新代码仓库链接
+        if data.get('repository_link') is not None and data.get('repository_link') != current_user.repository_link:
+            current_user.repository_link = data.get('repository_link')
         # 保存更改
         current_user.save()
         return JsonResponse({"status": "success", "message": "Profile updated successfully"}, status=status.HTTP_200_OK)
@@ -199,28 +219,17 @@ def search_users(request):
     keyword = request.GET.get('keyword')
     if keyword:
         # 创建查询条件，搜索多个字段
-        query = Q(username__icontains=keyword) | Q(real_name__icontains=keyword) | \
+        query = Q(username__icontains=keyword)  | \
                 Q(education__icontains=keyword) | Q(desired_position__icontains=keyword)
         users = User.objects.filter(query)
     else:
         # 如果没有提供关键词，则返回所有用户
         users = User.objects.all()
-
-    users = users.prefetch_related('companymember_set__company')
-
-    # 构建响应数据
     user_data = []
     for user in users:
-        company_members = user.companymember_set.all()
-        if company_members:
-            company_member = company_members.first()
-            company = company_member.company
-            company_id = str(company.company_id) if company else ''
-            company_name = company.company_name if company else ''
-        else:
-            company_id = ''
-            company_name = ''
-
+        company_member = CompanyMember.objects.filter(user=user).first()
+        company_name = company_member.company.company_name if company_member else ""
+        # 将用户数据转换为 JSON 格式并返回
         user_data.append({
             "username": user.username,
             "real_name": user.real_name,
@@ -228,11 +237,41 @@ def search_users(request):
             "desired_position": user.desired_position,
             "blog_link": user.blog_link,
             "repository_link": user.repository_link,
-            "company_id": company_id,
-            "company_name": company_name,
+            "company_name": company_name
         })
 
     return JsonResponse(user_data, safe=False)
 
 
+@csrf_exempt
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def upload_resume(request):
+    try:
+        # 从请求中获取文件
+        resume = request.FILES.get('resume', None)
+        if not resume:
+            return JsonResponse({"status": "error", "message": "No resume file provided"},
+                                status=status.HTTP_400_BAD_REQUEST)
+        # 获取用户
+        user = User.objects.get(username=request.user.username)
+        # 删除旧的简历文件，如果存在的话
+        try:
+            if user.resume:
+                with Lock(user.resume.path, 'r+b'):
+                    user.resume.delete(save=False)
+        except Exception:
+            pass
 
+        # 创建新的简历文件名
+        new_filename = f"{user.username}_resume.pdf"
+        # 读取和保存新文件
+        new_file = ContentFile(resume.read())
+        new_file.name = new_filename
+        # 保存新的简历
+        user.resume.save(new_filename, new_file, save=True)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    return JsonResponse({"status": "success", "message": "Resume uploaded successfully"}, status=status.HTTP_200_OK)
