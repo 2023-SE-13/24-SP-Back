@@ -225,19 +225,20 @@ def search_users(request):
     else:
         # 如果没有提供关键词，则返回所有用户
         users = User.objects.all()
-
-    company_member = CompanyMember.objects.filter(user=request.user).first()
-    company_name = company_member.company.company_name if company_member else ""
-    # 将用户数据转换为 JSON 格式并返回
-    user_data = [{
-        "username": user.username,
-        "real_name": user.real_name,
-        "education": user.education,
-        "desired_position": user.desired_position,
-        "blog_link": user.blog_link,
-        "repository_link": user.repository_link,
-        "company_name": company_name
-    } for user in users]
+    user_data = []
+    for user in users
+        company_member = CompanyMember.objects.filter(user=request.user).first()
+        company_name = company_member.company.company_name if company_member else ""
+        # 将用户数据转换为 JSON 格式并返回
+        user_data.append({
+            "username": user.username,
+            "real_name": user.real_name,
+            "education": user.education,
+            "desired_position": user.desired_position,
+            "blog_link": user.blog_link,
+            "repository_link": user.repository_link,
+            "company_name": company_name
+        })
 
     return JsonResponse(user_data, safe=False)
 
