@@ -19,23 +19,4 @@ urlpatterns = [
     path('search_company', search_company),
     path('is_staff', is_staff),
     path('is_to_join', is_to_join),
-    # path('remove_company_member', remove_company_member),
-    # path('get_member_role', get_user_role_in_company),
-    # path('set_member_role', set_company_member_role),
-    # path('get_company_members', get_company_members),
-    # path('get_companys', get_user_companys),
-
-    # path('set_company_image', set_company_image),
-    #
-    # path('create_public_group', chat_views.create_public_group),
-    # path('create_private_chat', chat_views.create_private_chat),
-    # path('save_message', chat_views.save_message),
-    # path('get_group', chat_views.get_group),
-    # path('get_user_groups', chat_views.get_user_groups),
-    # path('get_messages', chat_views.get_group_messages),
-    # path('get_group_members', chat_views.get_group_members),
-    # path('delete_group', chat_views.delete_group),
-    # path('add_group_member', chat_views.add_group_member),
-    # path('remove_group_member', chat_views.remove_group_member),
-    # path('get_user_role_in_group', chat_views.get_user_role_in_group),
 ]
