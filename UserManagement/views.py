@@ -14,6 +14,8 @@ from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 import random
 import json
+
+from CompanyManagement.models import CompanyMember
 from UserManagement.serializers import UserSerializer
 from UserManagement.models import User, VerificationCode
 from shared.decorators import require_user
@@ -224,6 +226,8 @@ def search_users(request):
         # 如果没有提供关键词，则返回所有用户
         users = User.objects.all()
 
+    company_member = CompanyMember.objects.filter(user=request.user).first()
+    company_name = company_member.company.company_name if company_member else ""
     # 将用户数据转换为 JSON 格式并返回
     user_data = [{
         "username": user.username,
@@ -231,7 +235,8 @@ def search_users(request):
         "education": user.education,
         "desired_position": user.desired_position,
         "blog_link": user.blog_link,
-        "repository_link": user.repository_link
+        "repository_link": user.repository_link,
+        "company_name": company_name
     } for user in users]
 
     return JsonResponse(user_data, safe=False)
