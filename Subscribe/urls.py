@@ -4,8 +4,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
-router.register(r'subscribe_companys', views.Subscribe_companyCURDViewSet)
-router.register(r'subscribe_users', views.Subscribe_userCURDViewSet)
+router.register(r'subscribeCompanys', views.SubscribeCompanyCURDViewSet)
+router.register(r'subscribeUsers', views.SubscribeUserCURDViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
