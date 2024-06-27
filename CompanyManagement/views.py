@@ -58,6 +58,15 @@ def create_company(request):
     company = Company(company_name=company_name, company_description=company_description)
     company.save()
 
+    # 设置默认image
+    default_image_path = 'resources/company_images/default_image.png'
+    with open(default_image_path, 'rb') as f:
+        image_content = f.read()
+    new_filename = f"{company.company_id}_image.png"
+    new_file = ContentFile(image_content)
+    new_file.name = new_filename
+    company.company_image.save(new_filename, new_file, save=True)
+
     # 将创建者加入Company
 
     user = request.user
