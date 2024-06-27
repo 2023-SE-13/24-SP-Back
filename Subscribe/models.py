@@ -4,7 +4,7 @@ from UserManagement.models import User
 from CompanyManagement.models import Company
 # Create your models here.
 
-class Subscribe_company(models.Model):
+class SubscribeCompany(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -20,7 +20,7 @@ class Subscribe_company(models.Model):
         return f"{self.user} subscribes to {self.company}"
 
 
-class Subscribe_user(models.Model):
+class SubscribeUser(models.Model):
     user_dst = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscribe_user_dst_set')
     user_src = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subscribe_user_src_set')
     created_at = models.DateTimeField(auto_now_add=True)

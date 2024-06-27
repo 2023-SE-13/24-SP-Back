@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'UserManagement.apps.UserManagementConfig',
-    'Subscribe',
+    'Subscribe.apps.SubscribeConfig',
     'CompanyManagement.apps.CompanyManagementConfig',
 ]
 
