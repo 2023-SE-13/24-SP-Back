@@ -19,4 +19,5 @@ urlpatterns = [
     path('search_company', search_company),
     path('is_staff', is_staff),
     path('is_to_join', is_to_join),
+    path('add_staff', add_company_member),
 ]
