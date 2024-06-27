@@ -6,25 +6,25 @@ import json
 from shared.decorators import require_user, require_company
 from .serializers import SubscribeCompanySerializer
 from .serializers import SubscribeUserSerializer
-from .models import Subscribe_user
-from .models import Subscribe_company
+from .models import SubscribeUser
+from .models import SubscribeCompany
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import viewsets, status
 
 
-class Subscribe_userCURDViewSet(viewsets.ModelViewSet):
+class SubscribeUserCURDViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    queryset = Subscribe_user.objects.all()
+    queryset = SubscribeUser.objects.all()
     serializer_class = SubscribeUserSerializer
 
-class Subscribe_companyCURDViewSet(viewsets.ModelViewSet):
+class SubscribeCompanyCURDViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    queryset = Subscribe_company.objects.all()
+    queryset = SubscribeCompany.objects.all()
     serializer_class = SubscribeCompanySerializer
 
 
@@ -37,8 +37,8 @@ def subscribe_company(request):
     if request.method == 'POST':
         company = request.company_object
         user = request.user
-        if not Subscribe_company.objects.filter(company=company, user=user).exists():
-            subscribe = Subscribe_company(company=company,user=user)
+        if not SubscribeCompany.objects.filter(company=company, user=user).exists():
+            subscribe = SubscribeCompany(company=company,user=user)
             company.company_subscription = company.company_subscription + 1
             company.save()
             subscribe.save()
@@ -56,8 +56,8 @@ def unsubscribe_company(request):
     if request.method == 'DELETE':
         company = request.company_object
         user = request.user
-        if Subscribe_company.objects.filter(company=company, user=user).exists():
-            subscribe = Subscribe_company.objects.get(company=company,user=user)
+        if SubscribeCompany.objects.filter(company=company, user=user).exists():
+            subscribe = SubscribeCompany.objects.get(company=company,user=user)
             company.company_subscription = company.company_subscription - 1
             company.save()
             subscribe.delete()
@@ -75,7 +75,7 @@ def do_subscribed_company(request):
     if request.method == 'POST':
         user = request.user
         company = request.company_object
-        if Subscribe_company.objects.filter(company=company, user=user).exists():
+        if SubscribeCompany.objects.filter(company=company, user=user).exists():
             return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
         else:
             return Response({"status": "fail"}, status=status.HTTP_201_CREATED)
@@ -90,8 +90,8 @@ def subscribe_user(request):
     if request.method == 'POST':
         user_1 = request.user
         user_2 = request.user_object
-        if not Subscribe_user.objects.filter(user_src=user_1, user_dst=user_2).exists():
-            subscribe = Subscribe_user(user_src=user_1,user_dst=user_2)
+        if not SubscribeUser.objects.filter(user_src=user_1, user_dst=user_2).exists():
+            subscribe = SubscribeUser(user_src=user_1,user_dst=user_2)
             user_2.user_subscription = user_2.user_subscription + 1
             user_2.save()
             subscribe.save()
@@ -109,8 +109,8 @@ def unsubscribe_user(request):
     if request.method == 'DELETE':
         user_1 = request.user
         user_2 = request.user_object
-        if Subscribe_user.objects.filter(user_src=user_1, user_dst=user_2).exists():
-            subscribe = Subscribe_user.objects.get(user_src=user_1, user_dst=user_2)
+        if SubscribeUser.objects.filter(user_src=user_1, user_dst=user_2).exists():
+            subscribe = SubscribeUser.objects.get(user_src=user_1, user_dst=user_2)
             user_2.user_subscription = user_2.user_subscription - 1
             user_2.save()
             subscribe.delete()
@@ -128,7 +128,7 @@ def do_subscribed_user(request):
     if request.method == 'POST':
         user_1 = request.user
         user_2 = request.user_object
-        if Subscribe_user.objects.filter(user_src=user_1, user_dst=user_2).exists():
+        if SubscribeUser.objects.filter(user_src=user_1, user_dst=user_2).exists():
             return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
         else:
             return Response({"status": "fail"}, status=status.HTTP_201_CREATED)
