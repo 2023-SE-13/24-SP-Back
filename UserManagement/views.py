@@ -219,7 +219,7 @@ def search_users(request):
     keyword = request.GET.get('keyword')
     if keyword:
         # 创建查询条件，搜索多个字段
-        query = Q(username__icontains=keyword) | Q(real_name__icontains=keyword) | \
+        query = Q(username__icontains=keyword)  | \
                 Q(education__icontains=keyword) | Q(desired_position__icontains=keyword)
         users = User.objects.filter(query)
     else:
