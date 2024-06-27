@@ -15,6 +15,7 @@ urlpatterns = [
     path('get_user', views.get_user),
     path('update_user', views.update_user),
     path('forget_password', views.forget_password),
-    path('search_users', views.search_users)
+    path('search_users', views.search_users),
+    path('upload_resume', views.upload_resume)
 
 ]
