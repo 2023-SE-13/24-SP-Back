@@ -6,6 +6,7 @@ from rest_framework import status
 
 from CompanyManagement.models import Company
 from PositionManagement.models import Position
+from TweetManagement.models import Tweet
 from UserManagement.models import *
 
 
@@ -78,3 +79,24 @@ def require_position(view_func):
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
+
+def require_tweet(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        tweet_id = request.GET.get('tweet_id')
+        if not tweet_id:
+            tweet_id = request.data.get('tweet_id')
+
+        if not tweet_id:
+            return JsonResponse({'status': 'error', 'message': 'Missing tweet_id parameter'}, status=400)
+
+        try:
+            tweet = Tweet.objects.get(tweet_id=tweet_id)
+        except Tweet.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Tweet does not exist'}, status=404)
+
+        request.tweet_object = tweet  # Attach tweet to request object so that it's available in the view
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
+

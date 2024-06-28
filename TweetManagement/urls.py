@@ -10,5 +10,11 @@ router = DefaultRouter()
 router.register(r'tweets', TweetCURDViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),    
+    path('', include(router.urls)),
+    path('create_tweet', create_tweet),
+    path('switch_tweetlike', switch_tweetlike),
+    path('delete_tweet', delete_tweet),
+    path('retweet', retweet),
+    path('comment_tweet', comment_tweet),
+    path('comment_user', comment_user),
 ]
