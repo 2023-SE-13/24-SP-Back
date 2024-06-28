@@ -98,7 +98,7 @@ def apply_position(request):
     if cur_usr.is_staff:
         return JsonResponse({"status": "error", "message": "Staff cannot apply for position"},
                             status=status.HTTP_400_BAD_REQUEST)
-    if User.objects.get(cur_usr.username).resume is None:
+    if User.objects.get(username=cur_usr.username).resume is None:
         return JsonResponse({"status": "error", "message": "Please upload your resume before applying for a position"},
                             status=status.HTTP_400_BAD_REQUEST)
     application = Application(user=cur_usr, position=position, applied_at=timezone.now())
@@ -110,15 +110,16 @@ def apply_position(request):
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
+@require_position
 def get_position_applications(request):
     cur_user = request.user
-    position_id = request.GET.get('position_id')
-    company = Position.objects.get(position_id=position_id).company
+    position = request.position_object
+    company = position.company
     cm = CompanyMember.objects.filter(user=cur_user, company=company).first()
     if cm is None or cm.role == 'Staff':
         return JsonResponse({"status": "error", "message": "You are not allowed to view applications"},
                             status=status.HTTP_400_BAD_REQUEST)
-    applications = Application.objects.filter(position__position_id=position_id)
+    applications = Application.objects.filter(position__position_id=position.position_id)
     result = []
     for application in applications:
         result.append({
@@ -129,4 +130,4 @@ def get_position_applications(request):
             'skills': [skill.name for skill in application.user.skills.all()],
             'applied_at': application.applied_at,
         })
-    return JsonResponse(result, status=status.HTTP_200_OK)
+    return JsonResponse(result, status=status.HTTP_200_OK, safe=False)
