@@ -50,7 +50,7 @@ class Comment(models.Model):
 
 class Likes(models.Model):
     like_id = models.UUIDField(primary_key=True, auto_created=True, unique=True, editable=False, default=uuid.uuid4)
-    tweet = models.ForeignKey(Tweet, on_delete=models.CASCADE)
+    tweet = models.ForeignKey(Tweet, on_delete=models.CASCADE, related_name='liked_by')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     class Meta:
         db_table = 'Likes'
