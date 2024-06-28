@@ -7,8 +7,9 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from CompanyManagement.models import Company, CompanyMember
+from CompanyManagement.models import CompanyMember
 from CompanyManagement.serializer import PositionSerializer
+from PositionManagement.models import Position
 from shared.decorators import require_position, require_company
 
 

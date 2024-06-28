@@ -4,7 +4,8 @@ from django.db.models import Q
 from django.http import JsonResponse
 from rest_framework import status
 
-from CompanyManagement.models import Company, Position
+from CompanyManagement.models import Company
+from PositionManagement.models import Position
 from UserManagement.models import *
 
 
