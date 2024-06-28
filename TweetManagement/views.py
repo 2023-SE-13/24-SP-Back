@@ -106,11 +106,11 @@ def retweet(request):
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 @require_tweet
+@require_textcontent
 def comment_tweet(request):
     user = request.user
     tweet = request.tweet_object
-    data = json.loads(request.body.decode('utf-8'))
-    content = data.get('content', None)
+    content = request.text_content
     Comment.objects.create(tweet=tweet, sender=user, content=content)
     tweet.comments += 1
     tweet.save()
@@ -142,13 +142,13 @@ def comment_comment(request):
 @require_tweet
 @require_user
 @require_comment
+@require_textcontent
 def comment_user(request):
     user = request.user
     tweet = request.tweet_object
     target_comment = request.comment_object
     target_user = request.user_object
-    data = json.loads(request.body.decode('utf-8'))
-    content = data.get('content', None)
+    content = request.text_content
     content = "回复 @" + target_user.username + " ：" + content
     Comment.objects.create(target_user=target_user, target_comment=target_comment, sender=user, content=content, tweet=tweet)
     tweet.comments += 1
