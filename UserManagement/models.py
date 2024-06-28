@@ -56,6 +56,7 @@ class Message(models.Model):
     message_id = models.UUIDField(primary_key=True, auto_created=True, unique=True, editable=False, default=uuid.uuid4)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    conversation = models.ForeignKey('Conversation', on_delete=models.CASCADE, related_name='messages')
     content = models.CharField(max_length=255)
     timestamp = models.DateTimeField(auto_now=True)
     message_type = models.CharField(max_length=255, choices=MESSAGE_TYPE_CHOICES, default='Text')
@@ -66,6 +67,18 @@ class Message(models.Model):
     def __str__(self):
         return self.message_id
 
+
+class Conversation(models.Model):
+    conversation_id = models.UUIDField(primary_key=True, auto_created=True, unique=True, editable=False, default=uuid.uuid4)
+    user1 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user1_conversations')
+    user2 = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user2_conversations')
+    last_message_time = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'Conversations'
+
+    def __str__(self):
+        return self.conversation_id
 
 
 

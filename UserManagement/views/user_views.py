@@ -76,8 +76,6 @@ def register(request):
         return JsonResponse({"status": "error", "message": "ERROR CODE"}, status=status.HTTP_401_UNAUTHORIZED)
 
     if verification_code.expires_at < timezone.now():
-        print(verification_code.expires_at)
-        print(timezone.now())
         return JsonResponse({"status": "error", "message": "Verification code expired"},
                             status=status.HTTP_401_UNAUTHORIZED)
 
@@ -105,7 +103,6 @@ def get_verification_code(request):
 
     # 保存验证码
     VerificationCode.objects.create(email=email, code=code)
-    print(timezone.now())
     # 在这里添加发送邮件的代码
     send_email(email, code)
 
@@ -141,8 +138,6 @@ def forget_password(request):
         return JsonResponse({"status": "error", "message": "ERROR CODE"}, status=status.HTTP_200_OK)
 
     if verification_code.expires_at < timezone.now():
-        print(verification_code.expires_at)
-        print(timezone.now())
         return JsonResponse({"status": "error", "message": "Verification code expired"},
                             status=status.HTTP_200_OK)
     user.set_password(data.get('password'))
@@ -166,8 +161,6 @@ def update_user(request):
             return JsonResponse({"status": "error", "message": "ERROR CODE"}, status=status.HTTP_401_UNAUTHORIZED)
 
         if verification_code.expires_at < timezone.now():
-            print(verification_code.expires_at)
-            print(timezone.now())
             return JsonResponse({"status": "error", "message": "Verification code expired"},
                                 status=status.HTTP_401_UNAUTHORIZED)
 

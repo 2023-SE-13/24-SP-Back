@@ -1,4 +1,6 @@
 import json
+
+import pytz
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -101,7 +103,9 @@ def apply_position(request):
     if User.objects.get(username=cur_usr.username).resume is None:
         return JsonResponse({"status": "error", "message": "Please upload your resume before applying for a position"},
                             status=status.HTTP_400_BAD_REQUEST)
-    application = Application(user=cur_usr, position=position, applied_at=timezone.now())
+    tz = pytz.timezone('Asia/Shanghai')
+    utc8time = timezone.now().astimezone(tz)
+    application = Application(user=cur_usr, position=position, applied_at=utc8time)
     application.save()
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 

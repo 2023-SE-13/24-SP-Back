@@ -22,6 +22,10 @@ class UserSerializer(serializers.ModelSerializer):
         company_member = CompanyMember.objects.filter(user=obj).first()
         return company_member.role if company_member else ""
 
+
+from rest_framework import serializers
+from .models import Message, Conversation
+
 class MessageSerializer(serializers.ModelSerializer):
     sender_uname = serializers.SerializerMethodField()
     receiver_uname = serializers.SerializerMethodField()
@@ -35,3 +39,18 @@ class MessageSerializer(serializers.ModelSerializer):
 
     def get_receiver_uname(self, obj):
         return obj.receiver.username
+
+
+class ConversationSerializer(serializers.ModelSerializer):
+    user1_uname = serializers.SerializerMethodField()
+    user2_uname = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Conversation
+        fields = ['conversation_id', 'user1_uname', 'user2_uname', 'last_message_time']
+
+    def get_user1_uname(self, obj):
+        return obj.user1.username
+
+    def get_user2_uname(self, obj):
+        return obj.user2.username
