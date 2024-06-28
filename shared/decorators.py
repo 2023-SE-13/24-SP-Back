@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from rest_framework import status
 
-from CompanyManagement.models import Company
+from CompanyManagement.models import Company, Position
 from UserManagement.models import *
 
 
@@ -53,6 +53,27 @@ def require_company(view_func):
             return JsonResponse({'status': 'error', 'message': 'Company does not exist'}, status=404)
 
         request.company_object = company  # Attach company to request object so that it's available in the view
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
+
+
+def require_position(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        position_id = request.GET.get('position_id')
+        if not position_id:
+            position_id = request.data.get('position_id')
+
+        if not position_id:
+            return JsonResponse({'status': 'error', 'message': 'Missing position_id parameter'}, status=400)
+
+        try:
+            position = Position.objects.get(position_id=position_id)
+        except Position.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Position does not exist'}, status=404)
+
+        request.position_object = position  # Attach position to request object so that it's available in the view
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view

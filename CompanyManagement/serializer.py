@@ -28,3 +28,9 @@ class CompanyMemberCompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyMember
         fields = ('company', 'role')
+
+
+class PositionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Position
+        fields = '__all__'
