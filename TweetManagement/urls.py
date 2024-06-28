@@ -17,4 +17,5 @@ urlpatterns = [
     path('retweet', retweet),
     path('comment_tweet', comment_tweet),
     path('comment_user', comment_user),
+    path('comment_comment', comment_comment),
 ]

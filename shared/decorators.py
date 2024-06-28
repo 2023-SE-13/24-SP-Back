@@ -6,7 +6,7 @@ from rest_framework import status
 
 from CompanyManagement.models import Company
 from PositionManagement.models import Position
-from TweetManagement.models import Tweet
+from TweetManagement.models import Tweet, Comment
 from UserManagement.models import *
 
 
@@ -100,3 +100,22 @@ def require_tweet(view_func):
 
     return _wrapped_view
 
+def require_comment(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        comment_id = request.GET.get('comment_id')
+        if not comment_id:
+            comment_id = request.data.get('comment_id')
+
+        if not comment_id:
+            return JsonResponse({'status': 'error', 'message': 'Missing comment_id parameter'}, status=400)
+
+        try:
+            comment = Comment.objects.get(comment_id=comment_id)
+        except Comment.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Comment does not exist'}, status=404)
+
+        request.comment_object = comment  # Attach comment to request object so that it's available in the view
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view

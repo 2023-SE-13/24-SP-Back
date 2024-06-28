@@ -37,7 +37,8 @@ class TweetPhoto(models.Model):
 
 class Comment(models.Model):
     comment_id = models.UUIDField(primary_key=True, auto_created=True, unique=True, editable=False, default=uuid.uuid4)
-    target_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_comments')
+    target_comment = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
+    target_user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True, related_name='received_comments')
     tweet = models.ForeignKey(Tweet, on_delete=models.CASCADE)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_comments')
     content = models.TextField()
