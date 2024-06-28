@@ -9,7 +9,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 
-from CompanyManagement.models import Company, CompanyMember
+from CompanyManagement.models import Company, CompanyMember, Position
 from CompanyManagement.serializer import CompanySerializer, CompanyMemberUserSerializer
 from UserManagement.models import User
 from CompanyManagement.models import JoinVerification
@@ -185,11 +185,11 @@ def leave_company(request):
             company = request.company_object
             user = request.user
 
-            # 尝试获取companymember对象
+            # 尝试获取company-member对象
             try:
 
                 member = CompanyMember.objects.get(company=company, user=user)
-                if member.role != ('Creator'):
+                if member.role != 'Creator':
                     # 如果找到了，则删除
                     member.delete()
 
