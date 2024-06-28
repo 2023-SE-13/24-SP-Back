@@ -2,7 +2,6 @@
 
 from rest_framework import serializers
 
-from PositionManagement.models import Position
 from UserManagement.serializers import UserSerializer
 from .models import *
 
@@ -29,9 +28,3 @@ class CompanyMemberCompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = CompanyMember
         fields = ('company', 'role')
-
-
-class PositionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Position
-        fields = '__all__'

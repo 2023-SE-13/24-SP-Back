@@ -8,8 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from CompanyManagement.models import CompanyMember
-from CompanyManagement.serializer import PositionSerializer
 from PositionManagement.models import Position
+from PositionManagement.serializer import PositionSerializer
 from shared.decorators import require_position, require_company
 
 
