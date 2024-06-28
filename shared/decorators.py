@@ -119,3 +119,20 @@ def require_comment(view_func):
         return view_func(request, *args, **kwargs)
 
     return _wrapped_view
+
+
+def require_textcontent(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        text_content = request.GET.get('text_content')
+        if not text_content:
+            text_content = request.data.get('text_content')
+
+        if not text_content:
+            return JsonResponse({'status': 'error', 'message': 'Missing content parameter'}, status=400)
+
+
+        request.text_content = text_content  # Attach comment to request object so that it's available in the view
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
