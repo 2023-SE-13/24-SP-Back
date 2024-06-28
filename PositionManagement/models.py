@@ -14,7 +14,9 @@ class Position(models.Model):
     position_description = models.CharField(max_length=255)
     location = models.CharField(max_length=255, null=True, blank=True)
     education_requirement = models.CharField(max_length=255, null=True, blank=True)
-    salary = models.CharField(max_length=255, null=True, blank=True)
+    salary_min = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # 最低薪资
+    salary_max = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # 最高薪资
+    posted_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     class Meta:
         db_table = 'Positions'
