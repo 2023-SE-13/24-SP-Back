@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'Subscribe.apps.SubscribeConfig',
     'CompanyManagement.apps.CompanyManagementConfig',
     'TweetManagement.apps.TweetManagementConfig',
+    'PositionManagement.apps.PositionManagementConfig',
 ]
 
 MIDDLEWARE = [

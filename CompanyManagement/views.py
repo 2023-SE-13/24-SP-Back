@@ -2,17 +2,15 @@ import json
 from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 
-from CompanyManagement.models import Company, CompanyMember, Position
 from CompanyManagement.serializer import CompanySerializer, CompanyMemberUserSerializer
 from UserManagement.models import User
-from CompanyManagement.models import JoinVerification
+from CompanyManagement.models import JoinVerification, CompanyMember
 from shared.decorators import require_user, require_company
 
 
