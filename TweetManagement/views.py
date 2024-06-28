@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from TweetManagement.models import Tweet, TweetPhoto, Likes, Comment
 from TweetManagement.serializers import TweetSerializer
 from UserManagement.models import User
-from shared.decorators import require_user, require_company, require_tweet
+from shared.decorators import require_user, require_company, require_tweet, require_comment
 
 
 class TweetCURDViewSet(viewsets.ModelViewSet):
@@ -30,8 +30,8 @@ class TweetCURDViewSet(viewsets.ModelViewSet):
 @authentication_classes([TokenAuthentication])
 def create_tweet(request):
     user = request.user
-    data = json.loads(request.body.decode('utf-8'))
-    text_content = data.get('text_content', None)
+    # formdata
+    text_content = request.POST.get('text_content', None)
     tweet = Tweet.objects.create(user=user, text_content=text_content)
     try:
         # 从请求中获取图片文件列表
@@ -120,14 +120,36 @@ def comment_tweet(request):
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 @require_tweet
-@require_user
-def comment_user(request):
+@require_comment
+def comment_comment(request):
     user = request.user
-    target_user = request.user_object
     tweet = request.tweet_object
+    comment = request.comment_object
     data = json.loads(request.body.decode('utf-8'))
     content = data.get('content', None)
-    Comment.objects.create(target_user=target_user, sender=user, content=content, tweet=tweet)
+
+    Comment.objects.create(target_comment=comment, sender=user, content=content, tweet=tweet)
+    tweet.comments += 1
+    tweet.save()
+    return JsonResponse({"status": "success", "message": "User commented successfully"}, status=status.HTTP_201_CREATED)
+
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
+@require_tweet
+@require_user
+@require_comment
+def comment_user(request):
+    user = request.user
+    tweet = request.tweet_object
+    target_comment = request.comment_object
+    target_user = request.user_object
+    data = json.loads(request.body.decode('utf-8'))
+    content = data.get('content', None)
+    content = "回复 @" + target_user.username + " ：" + content
+    Comment.objects.create(target_user=target_user, target_comment=target_comment, sender=user, content=content, tweet=tweet)
     tweet.comments += 1
     tweet.save()
     return JsonResponse({"status": "success", "message": "User commented successfully"}, status=status.HTTP_201_CREATED)
