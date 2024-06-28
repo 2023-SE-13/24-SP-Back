@@ -81,7 +81,7 @@ def register(request):
         return JsonResponse({"status": "error", "message": "Verification code expired"},
                             status=status.HTTP_401_UNAUTHORIZED)
 
-    if get_user_by_email(email) or get_user_by_username(username):
+    if get_user_by_username(username):
         return JsonResponse({"status": "error", "message": "User already exists"}, status=status.HTTP_409_CONFLICT)
 
     hashed_password = make_password(password)
