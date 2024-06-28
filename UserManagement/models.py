@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from shared.utils.datetime import get_expiry_time
@@ -42,6 +44,27 @@ class VerificationCode(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class Message(models.Model):
+    MESSAGE_TYPE_CHOICES = [
+        ('Text', 'Text'),
+        ('Image', 'Image'),
+        ('File', 'File'),
+    ]
+
+    message_id = models.UUIDField(primary_key=True, auto_created=True, unique=True, editable=False, default=uuid.uuid4)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    content = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now=True)
+    message_type = models.CharField(max_length=255, choices=MESSAGE_TYPE_CHOICES, default='Text')
+
+    class Meta:
+        db_table = 'Messages'
+
+    def __str__(self):
+        return self.message_id
 
 
 
