@@ -5,10 +5,11 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from CompanyManagement.models import Company, CompanyMember, Position
+from CompanyManagement.models import Company, CompanyMember
 from CompanyManagement.serializer import PositionSerializer
-from shared.decorators import require_position
+from shared.decorators import require_position, require_company
 
 
 @csrf_exempt
@@ -51,7 +52,7 @@ def get_position(request):
 
 
 @csrf_exempt
-@api_view(['PUT'])
+@api_view(['DELETE'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 @require_position
@@ -67,3 +68,16 @@ def delete_position(request):
                             status=status.HTTP_400_BAD_REQUEST)
     position.delete()
     return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(['GET'])
+@require_company
+def get_position_list(request):
+    company = request.company_object
+    positions = Position.objects.filter(company=company)
+    serializer = PositionSerializer(positions, many=True)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
