@@ -273,3 +273,28 @@ def is_to_join(request):
         return JsonResponse({"status": "y"}, status=status.HTTP_200_OK)
     else:
         return JsonResponse({"status": "n"}, status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(['POST'])
+@require_company
+@require_user
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def transfer_admin(request):
+    company = request.company_object
+    admin_user = request.user
+    user_to_transfer = request.user_object
+    company_member = CompanyMember.objects.get(company=company, user=user_to_transfer)
+    if company_member.exists():
+        if company_member.role == 'Staff':
+            # 完美符合，可以转让
+            CompanyMember.objects.get(company=company, user=admin_user).update(role='Staff')
+            company_member.update(role='Admin')
+            return JsonResponse({"status": "success"}, status=status.HTTP_200_OK)
+        else:
+            return JsonResponse({"status": "error", "message": "Target user's is not a staff"},
+                                status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return JsonResponse({"status": "error", "message": "Target user is not a member of this company"},
+                            status=status.HTTP_404_NOT_FOUND)

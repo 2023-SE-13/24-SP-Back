@@ -26,4 +26,5 @@ urlpatterns = [
     path('api/company/', include('CompanyManagement.urls')),
     path('api/subscribe/', include('Subscribe.urls')),
     path('api/position/', include('PositionManagement.urls')),
+    path('api/tweet/', include('TweetManagement.urls'))
 ]
