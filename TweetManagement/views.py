@@ -14,7 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from TweetManagement.models import Tweet, TweetPhoto, Likes, Comment
 from TweetManagement.serializers import TweetSerializer
 from UserManagement.models import User
-from shared.decorators import require_user, require_company, require_tweet, require_comment
+from shared.decorators import require_user, require_company, require_tweet, require_comment, require_textcontent
 
 
 class TweetCURDViewSet(viewsets.ModelViewSet):
@@ -122,12 +122,12 @@ def comment_tweet(request):
 @authentication_classes([TokenAuthentication])
 @require_tweet
 @require_comment
+@require_textcontent
 def comment_comment(request):
     user = request.user
     tweet = request.tweet_object
     comment = request.comment_object
-    data = json.loads(request.body.decode('utf-8'))
-    content = data.get('content', None)
+    content = request.text_content
 
     Comment.objects.create(target_comment=comment, sender=user, content=content, tweet=tweet)
     tweet.comments += 1
