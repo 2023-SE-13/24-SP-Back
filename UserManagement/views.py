@@ -179,7 +179,7 @@ def update_user(request):
         for field in fields_to_update:
             if data.get(field) is not None and getattr(current_user, field) != data.get(field):
                 setattr(current_user, field, data.get(field))
-        skills = data.getList('skills')
+        skills = data.get('skills')
         if skills:
             current_user.skills.clear()
             for skill in skills:
