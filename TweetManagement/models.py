@@ -44,4 +44,4 @@ class Comment(models.Model):
         db_table = 'Comments'
 
     def __str__(self):
-        return f"{self.user} - {self.comment_id} ({self.tweet})"
+        return f"{self.sender} - {self.comment_id} ({self.tweet})"
