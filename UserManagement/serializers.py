@@ -22,3 +22,16 @@ class UserSerializer(serializers.ModelSerializer):
         company_member = CompanyMember.objects.filter(user=obj).first()
         return company_member.role if company_member else ""
 
+class MessageSerializer(serializers.ModelSerializer):
+    sender_uname = serializers.SerializerMethodField()
+    receiver_uname = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Message
+        fields = ['message_id', 'message_type', 'sender_uname', 'receiver_uname', 'content', 'timestamp']
+
+    def get_sender_uname(self, obj):
+        return obj.sender.username
+
+    def get_receiver_uname(self, obj):
+        return obj.receiver.username

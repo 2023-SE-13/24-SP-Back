@@ -13,14 +13,14 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import viewsets, status
 
 
-class Subscribe_userCURDViewSet(viewsets.ModelViewSet):
+class SubscribeUserCURDViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     queryset = SubscribeUser.objects.all()
     serializer_class = SubscribeUserSerializer
 
-class Subscribe_companyCURDViewSet(viewsets.ModelViewSet):
+class SubscribeCompanyCURDViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 

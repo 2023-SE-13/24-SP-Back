@@ -17,7 +17,7 @@ import json
 
 from CompanyManagement.models import CompanyMember
 from UserManagement.serializers import UserSerializer
-from UserManagement.models import User, VerificationCode
+from UserManagement.models import User, VerificationCode, Skill
 from shared.decorators import require_user
 from shared.utils.UserManage.users import get_user_by_username, get_user_by_email
 from shared.utils.email import send_email
@@ -157,7 +157,7 @@ def update_user(request):
     data = request.data  # 获取前端传入的JSON数据
 
     # 获取通过Token验证的当前用户
-    current_user = request.user
+    current_user = User.objects.get(username=request.user.username)
 
     if data.get('password') is not None or data.get('email') is not None:
         verification_code = VerificationCode.objects.filter(email=current_user.email).order_by('-created_at').first()
@@ -173,29 +173,17 @@ def update_user(request):
 
     # 在这里进行实际的更新操作
     try:
-        # 更新密码
-        if data.get('password') is not None and not check_password(data.get('password'), current_user.password):
-            current_user.set_password(data.get('password'))
-        # 更新真实姓名
-        if data.get('real_name') is not None and data.get('real_name') != current_user.real_name:
-            current_user.real_name = data.get('real_name')
-        # 更新邮箱
-        if data.get('email') is not None and data.get('email') != current_user.email:
-            if get_user_by_email(data.get('email')):
-                return JsonResponse({"status": "error", "message": "Email already used"})
-            current_user.email = data.get('email')
-        # 更新教育经历
-        if data.get('education') is not None and data.get('education') != current_user.education:
-            current_user.education = data.get('education')
-        # 更新期望职位
-        if data.get('desired_position') is not None and data.get('desired_position') != current_user.desired_position:
-            current_user.desired_position = data.get('desired_position')
-        # 更新博客链接
-        if data.get('blog_link') is not None and data.get('blog_link') != current_user.blog_link:
-            current_user.blog_link = data.get('blog_link')
-        # 更新代码仓库链接
-        if data.get('repository_link') is not None and data.get('repository_link') != current_user.repository_link:
-            current_user.repository_link = data.get('repository_link')
+        fields_to_update = ['password', 'real_name', 'email', 'education', 'desired_position', 'blog_link',
+                            'repository_link', 'desired_work_city', 'salary_min', 'salary_max']
+
+        for field in fields_to_update:
+            if data.get(field) is not None and getattr(current_user, field) != data.get(field):
+                setattr(current_user, field, data.get(field))
+        skills = data.get('skills')
+        if skills:
+            current_user.skills.clear()
+            for skill in skills:
+                current_user.skills.add(Skill.objects.get(name=skill))
         # 保存更改
         current_user.save()
         return JsonResponse({"status": "success", "message": "Profile updated successfully"}, status=status.HTTP_200_OK)
@@ -275,3 +263,4 @@ def upload_resume(request):
         return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"},
                             status=status.HTTP_400_BAD_REQUEST)
     return JsonResponse({"status": "success", "message": "Resume uploaded successfully"}, status=status.HTTP_200_OK)
+
