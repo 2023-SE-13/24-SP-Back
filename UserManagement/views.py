@@ -17,7 +17,7 @@ import json
 
 from CompanyManagement.models import CompanyMember
 from UserManagement.serializers import UserSerializer
-from UserManagement.models import User, VerificationCode
+from UserManagement.models import User, VerificationCode, Skill
 from shared.decorators import require_user
 from shared.utils.UserManage.users import get_user_by_username, get_user_by_email
 from shared.utils.email import send_email
@@ -157,7 +157,7 @@ def update_user(request):
     data = request.data  # 获取前端传入的JSON数据
 
     # 获取通过Token验证的当前用户
-    current_user = request.user
+    current_user = User.objects.get(username=request.user.username)
 
     if data.get('password') is not None or data.get('email') is not None:
         verification_code = VerificationCode.objects.filter(email=current_user.email).order_by('-created_at').first()
@@ -174,11 +174,16 @@ def update_user(request):
     # 在这里进行实际的更新操作
     try:
         fields_to_update = ['password', 'real_name', 'email', 'education', 'desired_position', 'blog_link',
-                            'repository_link']
+                            'repository_link', 'desired_work_city', 'salary_min', 'salary_max']
 
         for field in fields_to_update:
             if data.get(field) is not None and getattr(current_user, field) != data.get(field):
                 setattr(current_user, field, data.get(field))
+        skills = data.get('skills')
+        if skills:
+            current_user.skills.clear()
+            for skill in skills:
+                current_user.skills.add(Skill.objects.get(name=skill))
         # 保存更改
         current_user.save()
         return JsonResponse({"status": "success", "message": "Profile updated successfully"}, status=status.HTTP_200_OK)
@@ -258,3 +263,4 @@ def upload_resume(request):
         return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"},
                             status=status.HTTP_400_BAD_REQUEST)
     return JsonResponse({"status": "success", "message": "Resume uploaded successfully"}, status=status.HTTP_200_OK)
+
