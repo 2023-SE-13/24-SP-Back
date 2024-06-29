@@ -1,5 +1,4 @@
 from rest_framework import serializers
-
 from CompanyManagement.models import CompanyMember
 from .models import *
 
@@ -27,9 +26,6 @@ class UserSerializer(serializers.ModelSerializer):
         company_member = CompanyMember.objects.filter(user=obj).first()
         return company_member.role if company_member else ""
 
-
-from rest_framework import serializers
-from .models import Message, Conversation
 
 class MessageSerializer(serializers.ModelSerializer):
     sender_uname = serializers.SerializerMethodField()
