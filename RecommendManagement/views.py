@@ -16,13 +16,15 @@ from UserManagement.models import User
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
-def recommend_company_user(request):
+def recommend_subscribe(request):
     user = request.user
     desired_position = user.desired_position
-    positions = Position.objects.filter(position_name=desired_position)
+    positions = Position.objects.filter(position_tag=desired_position)
     user_skills = user.skills.all()
     related_users = User.objects.filter(skills__in=user_skills).exclude(username=user.username).annotate(num_common_skills=Count('skills')).filter(num_common_skills__gt=0).order_by('-num_common_skills')
-    related_companies = positions.values_list('company', flat=True)
+    related_companies = []
+    for position in positions:  
+        related_companies.append(position.company.company_id)
     recommends = {
         "users": [],
         "companies": []
