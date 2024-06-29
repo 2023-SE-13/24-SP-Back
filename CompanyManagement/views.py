@@ -55,7 +55,6 @@ def create_company(request):
 
     company = Company(company_name=company_name, company_description=company_description)
     company.save()
-
     # 设置默认image
     default_image_path = 'resources/company_images/default_image.png'
     with open(default_image_path, 'rb') as f:
@@ -66,13 +65,31 @@ def create_company(request):
     company.company_image.save(new_filename, new_file, save=True)
 
     # 将创建者加入Company
-
     user = request.user
     company_member = CompanyMember(company=company, user=user, role='Creator')
     company_member.save()
     user.is_staff = True
     user.save()
+    return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 
+
+@api_view(['PUT'])
+@csrf_exempt
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def update_company(request):
+    data = json.loads(request.body.decode('utf-8'))
+    cur_user = request.user
+    cm = CompanyMember.objects.filter(user=cur_user).first()
+    if cm is None or cm.role == 'Staff':
+        return JsonResponse({"status": "error", "message": "You are not allowed to update company"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    company = cm.company
+    fields_to_update = ['company_name', 'company_description']
+    for field in fields_to_update:
+        if field in data:
+            setattr(company, field, data[field])
+    company.save()
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 
 
@@ -88,7 +105,6 @@ def add_company_member(request):
     current_user = request.user
     company = request.company_object
     user_to_add = request.user_object
-
     # 检查当前用户是否为企业成员
     if not CompanyMember.objects.filter(company=company, user=current_user).exists():
         return JsonResponse({"status": "error", "message": "You are not a member of this company"},
@@ -182,15 +198,12 @@ def leave_company(request):
         try:
             company = request.company_object
             user = request.user
-
             # 尝试获取company-member对象
             try:
-
                 member = CompanyMember.objects.get(company=company, user=user)
                 if member.role != 'Creator':
                     # 如果找到了，则删除
                     member.delete()
-
                     user.is_staff = 0  # 或者如果is_staff是布尔字段，可以使用 user_manage_obj.is_staff = False
                     user.save()  # 保存更改
                 # 返回成功的响应
@@ -200,11 +213,9 @@ def leave_company(request):
             except CompanyMember.DoesNotExist:
                 # 如果没有找到，则返回失败的响应
                 return JsonResponse({'status': 'fail', 'message': 'Member not found'}, status=404)
-
         except json.JSONDecodeError:
             # 如果JSON解析失败，返回错误响应
             return JsonResponse({'status': 'fail', 'message': 'Invalid JSON data'}, status=400)
-
             # 如果不是POST请求，返回错误响应
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=405)
 
