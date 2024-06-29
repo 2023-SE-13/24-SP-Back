@@ -14,6 +14,7 @@ from rest_framework.permissions import IsAuthenticated
 from TweetManagement.models import Tweet, TweetPhoto, Likes, Comment
 from TweetManagement.serializers import TweetSerializer
 from UserManagement.models import User
+from CompanyManagement.models import CompanyMember
 from shared.decorators import require_user, require_company, require_tweet, require_comment, require_textcontent
 
 
@@ -154,3 +155,57 @@ def comment_user(request):
     tweet.comments += 1
     tweet.save()
     return JsonResponse({"status": "success", "message": "User commented successfully"}, status=status.HTTP_201_CREATED)
+
+@csrf_exempt
+@api_view(['GET'])
+@require_company
+def get_company_tweet(request):
+    company = request.company_object
+    members = CompanyMember.objects.filter(company=company).values_list('user_id', flat=True)
+    company_tweets = Tweet.objects.filter(user_id__in=members).order_by('-created_at')
+    data = []
+    for company_tweet in company_tweets:
+        data.append(
+			company_tweet.tweet_id
+		)
+    return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
+
+@csrf_exempt	
+@api_view(['GET'])
+@require_tweet
+def get_tweet_comment(request):
+    tweet = request.tweet_object
+    comments = Comment.objects.filter(tweet=tweet)
+    data = []
+    for comment in comments:
+        children_comment_id = list(Comment.objects.filter(target_comment=comment).values_list('comment_id', flat=True))
+        data.append(
+			{
+				"comment_id": comment.comment_id,
+				"comment_sender": comment.sender.username,
+				"content": comment.content,
+				"createTime": comment.created_at,
+				"children_list": children_comment_id,
+			}
+		)
+    return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
+# TODO
+
+@csrf_exempt
+@api_view(['GET'])
+@require_tweet
+def get_tweet(request):
+    tweet = request.tweet_object
+    return JsonResponse({"status": "success", "data": TweetSerializer(tweet).data},  status=status.HTTP_200_OK)
+
+@csrf_exempt
+@api_view(['GET'])
+@require_comment
+def get_comment(request):
+    comment = request.comment_object
+    return JsonResponse({"status": "success", "data": {
+        "comment_id": comment.comment_id,
+        "sender": comment.sender.username,
+        "content": comment.content,
+        "createTime": comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+    }},  status=status.HTTP_200_OK)
