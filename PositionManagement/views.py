@@ -1,4 +1,6 @@
 import json
+
+import pytz
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -11,7 +13,7 @@ from rest_framework.response import Response
 from CompanyManagement.models import CompanyMember
 from PositionManagement.models import Position, Application
 from PositionManagement.serializer import PositionSerializer
-from UserManagement.models import User
+from UserManagement.models import User, Skill
 from shared.decorators import require_position, require_company
 
 
@@ -36,13 +38,19 @@ def create_position(request):
     education_requirement = data.get('education_requirement')
     salary_min = data.get('salary_min')
     salary_max = data.get('salary_max')
+    skill_required = data.get('skill_required')
     if not position_name or not position_description:
         return JsonResponse(
             {"status": "error", "message": "position_name, position_description are required"},
             status=status.HTTP_406_NOT_ACCEPTABLE)
     position = Position(company=company, position_name=position_name, position_description=position_description,
-                        location=location, education_requirement=education_requirement, salary_min=salary_min, salary_max=salary_max)
+                        location=location, education_requirement=education_requirement, salary_min=salary_min,
+                        salary_max=salary_max)
     position.save()
+    for skill in skill_required:
+        position.skill_required.add(Skill.objects.get(name=skill))
+    position.save()
+    print(position.skill_required.all())
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 
 
@@ -101,7 +109,9 @@ def apply_position(request):
     if User.objects.get(username=cur_usr.username).resume is None:
         return JsonResponse({"status": "error", "message": "Please upload your resume before applying for a position"},
                             status=status.HTTP_400_BAD_REQUEST)
-    application = Application(user=cur_usr, position=position, applied_at=timezone.now())
+    tz = pytz.timezone('Asia/Shanghai')
+    utc8time = timezone.now().astimezone(tz)
+    application = Application(user=cur_usr, position=position, applied_at=utc8time)
     application.save()
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 

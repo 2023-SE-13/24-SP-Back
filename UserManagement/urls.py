@@ -16,6 +16,12 @@ urlpatterns = [
     path('update_user', views.update_user),
     path('forget_password', views.forget_password),
     path('search_users', views.search_users),
-    path('upload_resume', views.upload_resume)
+    path('upload_resume', views.upload_resume),
+
+    path('save_message', views.save_message),
+    path('get_conversations', views.get_conversations),
+    path('create_conversation', views.create_conversation),
+    path('get_messages', views.get_messages),
+
 
 ]

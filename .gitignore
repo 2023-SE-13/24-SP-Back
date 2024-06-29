@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 .idea/
+.scannerwork/
 # C extensions
 *.so
 restart_server.sh
