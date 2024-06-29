@@ -26,11 +26,11 @@ class TweetSerializer(serializers.ModelSerializer):
         return obj.user.username if obj else None
     
     def get_comment_tree(self, obj):
-        comments = Comment.objects.filter(tweet=obj)
-        comment_tree = []
+        comments = Comment.objects.filter(tweet=obj).order_by('created_at')
+        comment_tree = {}
         for comment in comments:
             if comment.target_comment:
-                comment_tree[comment.target_comment.comment_id].append(comment.comment_id)
+                comment_tree[str(comment.target_comment.comment_id)].append(str(comment.comment_id))
             else:
-                comment_tree.append([comment.comment_id])
+                comment_tree[str(comment.comment_id)] = []
         return comment_tree if comment_tree else None
