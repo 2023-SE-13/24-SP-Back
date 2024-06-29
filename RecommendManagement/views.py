@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from CompanyManagement.models import Company
 from PositionManagement.models import Position
+from PositionManagement.serializer import PositionSerializer
 from UserManagement.models import User
 
 
@@ -38,6 +39,18 @@ def recommend_subscribe(request):
         recommends['companies'].append({
             "company_name": company.company_name,
         })
+    return JsonResponse({"status": "success", "data": recommends}, status=200)
+
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
+def recommend_position(request):
+    user = request.user
+    related_positions = Position.objects.filter(position_tag=user.desired_position)
+    recommends = []
+    for related_position in related_positions:
+        recommends.append(PositionSerializer(related_position).data)
     return JsonResponse({"status": "success", "data": recommends}, status=200)
 
 

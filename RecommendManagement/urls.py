@@ -3,4 +3,5 @@ from RecommendManagement.views import *
 
 urlpatterns = [
     path('recommend_subscribe', recommend_subscribe),
+    path('recommend_position', recommend_position),
 ]
