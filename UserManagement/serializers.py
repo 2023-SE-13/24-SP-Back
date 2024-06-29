@@ -11,7 +11,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email', 'real_name', 'is_staff',
-                  'education', 'desired_position', 'blog_link', 'repository_link', 'company_id', 'role')
+                  'education', 'desired_position', 'blog_link', 'repository_link', 'company_id', 'role', 'skills')
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['skills'] = [skill.name for skill in instance.skills.all()]
+        return representation
 
     def get_company_id(self, obj):
         # 使用 filter() 替代 get() 并链式调用 first() 获取第一个匹配的实例

@@ -11,6 +11,9 @@ class PositionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def to_representation(self, instance):
+        skills = instance.skill_required.all()
+        skill_names = [skill.name for skill in skills]
         representation = super().to_representation(instance)
         representation['company_id'] = representation.pop('company')
+        representation['skill_required'] = skill_names
         return representation
