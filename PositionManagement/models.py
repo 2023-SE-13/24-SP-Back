@@ -17,8 +17,8 @@ class Position(models.Model):
     salary_min = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # 最低薪资
     salary_max = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # 最高薪资
     posted_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    skill_required = models.ManyToManyField('UserManagement.Skill', blank=True)
-
+    position_tag = models.CharField(max_length=255, null=True, blank=True)
+ 
     class Meta:
         db_table = 'Positions'
 
