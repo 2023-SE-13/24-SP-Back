@@ -12,6 +12,7 @@ from UserManagement.serializers import MessageSerializer, ConversationSerializer
 from shared.decorators import require_user
 import pytz
 
+
 @csrf_exempt
 @api_view(['POST'])
 def save_message(request):
@@ -49,6 +50,7 @@ def get_conversations(request):
     serializer = ConversationSerializer(conversations, many=True)
     return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
+
 @csrf_exempt
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
@@ -72,6 +74,7 @@ def create_conversation(request):
                          "message": "Private chat created successfully",
                          "conversation_id": conversation.conversation_id},
                         status=status.HTTP_201_CREATED)
+
 
 @csrf_exempt
 @api_view(['GET'])
