@@ -8,6 +8,7 @@ class TweetSerializer(serializers.ModelSerializer):
     photos = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
     comment_tree = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
  
     class Meta:
         model = Tweet
@@ -25,4 +26,11 @@ class TweetSerializer(serializers.ModelSerializer):
         return obj.user.username if obj else None
     
     def get_comment_tree(self, obj):
-        
+        comments = Comment.objects.filter(tweet=obj)
+        comment_tree = []
+        for comment in comments:
+            if comment.target_comment:
+                comment_tree[comment.target_comment.comment_id].append(comment.comment_id)
+            else:
+                comment_tree.append([comment.comment_id])
+        return comment_tree if comment_tree else None

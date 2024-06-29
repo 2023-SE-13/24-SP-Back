@@ -166,7 +166,7 @@ def get_company_tweet(request):
     data = []
     for company_tweet in company_tweets:
         data.append(
-			TweetSerializer(company_tweet).data
+			company_tweet.tweet_id
 		)
     return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
 
@@ -197,3 +197,15 @@ def get_tweet_comment(request):
 def get_tweet(request):
     tweet = request.tweet_object
     return JsonResponse({"status": "success", "data": TweetSerializer(tweet).data},  status=status.HTTP_200_OK)
+
+@csrf_exempt
+@api_view(['GET'])
+@require_comment
+def get_comment(request):
+    comment = request.comment_object
+    return JsonResponse({"status": "success", "data": {
+        "comment_id": comment.comment_id,
+        "sender": comment.sender.username,
+        "content": comment.content,
+        "createTime": comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+    }},  status=status.HTTP_200_OK)
