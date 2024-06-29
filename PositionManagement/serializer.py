@@ -1,10 +1,11 @@
 from rest_framework import serializers
 
-from PositionManagement.models import Position
+from PositionManagement.models import Position, Application
 
 
 class PositionSerializer(serializers.ModelSerializer):
     company_id = serializers.PrimaryKeyRelatedField(source='company', read_only=True)
+    application_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Position
@@ -17,3 +18,7 @@ class PositionSerializer(serializers.ModelSerializer):
         representation['company_id'] = representation.pop('company')
         representation['skill_required'] = skill_names
         return representation
+
+    def get_application_count(self, obj):
+        # 计算每个职位的申请数量
+        return Application.objects.filter(position=obj).count()
