@@ -18,4 +18,6 @@ urlpatterns = [
     path('comment_tweet', comment_tweet),
     path('comment_user', comment_user),
     path('comment_comment', comment_comment),
+    path('get_company_tweet', get_company_tweet),
+	path('get_tweet_comment', get_tweet_comment),
 ]
