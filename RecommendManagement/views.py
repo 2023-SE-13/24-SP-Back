@@ -73,3 +73,24 @@ def recommend_position(request):
     return JsonResponse({"status": "success", "data": recommends}, status=200)
 
 
+@csrf_exempt
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
+@require_position
+def recommend_simposition(request):
+    user = request.user
+    position = request.position_object
+    recommends = []
+    desired_position = position.position_tag
+    if desired_position:
+        related_positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
+
+        for related_position in related_positions:
+            recommends.append(PositionSerializer(related_position).data)
+    else:
+        latest_positions = Position.objects.filter().order_by('-created_at')[:9]
+        for latest_position in latest_positions:
+            recommends.append(PositionSerializer(latest_position).data)
+    return JsonResponse({"status": "success", "data": recommends}, status=200)
+
