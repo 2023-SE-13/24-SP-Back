@@ -11,7 +11,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('username', 'email', 'real_name', 'is_staff',
-                  'education', 'desired_position', 'blog_link', 'repository_link', 'company_id', 'role', 'skills', 'years_of_service', 'cur_position', 'school', 'age')
+                  'education', 'desired_position', 'blog_link', 'repository_link', 'company_id', 'role', 'skills',
+                  'years_of_service', 'cur_position', 'school', 'age', 'resume_uploaded')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -32,6 +33,9 @@ class UserSerializer(serializers.ModelSerializer):
     def get_role(self, obj):
         company_member = CompanyMember.objects.filter(user=obj).first()
         return company_member.role if company_member else ""
+
+    def get_resume_uploaded(self, obj):
+        return True if obj.resume else False
 
 
 class MessageSerializer(serializers.ModelSerializer):
