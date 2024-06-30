@@ -39,8 +39,11 @@ def create_position(request):
     salary_min = data.get('salary_min')
     salary_max = data.get('salary_max')
     skill_required = data.get('skill_required')
-    position_tag = PositionTag.objects.filter(category=data.get('position_tag').get('category'),
+    if data.get('position_tag'):
+        position_tag = PositionTag.objects.filter(category=data.get('position_tag').get('category'),
                                               specialization=data.get('position_tag').get('specialization')).first()
+    else:
+        position_tag = None
     if not position_name or not position_description:
         return JsonResponse(
             {"status": "error", "message": "position_name, position_description are required"},

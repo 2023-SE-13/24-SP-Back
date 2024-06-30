@@ -15,6 +15,11 @@ class UserSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['skills'] = [skill.name for skill in instance.skills.all()]
+        if instance.desired_position:
+            #返回一个列表，每个元素是一个json，包括category和specialization
+            representation['desired_position'] = [{'category': tag.category, 'specialization': tag.specialization} for tag in instance.desired_position.all()]
+        else:
+            representation['desired_position'] = None
         return representation
 
     def get_company_id(self, obj):
