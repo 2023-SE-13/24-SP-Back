@@ -75,11 +75,8 @@ def recommend_position(request):
 
 @csrf_exempt
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
 @require_position
 def recommend_simposition(request):
-    user = request.user
     position = request.position_object
     recommends = []
     desired_position = position.position_tag
