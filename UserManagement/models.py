@@ -42,6 +42,8 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to='resources/avatars/', null=True, blank=True)
     years_of_service = models.IntegerField(null=True, blank=True)
     cur_position = models.CharField(max_length=255, null=True, blank=True)
+    school = models.CharField(max_length=255, null=True, blank=True)
+    age = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'Users'
