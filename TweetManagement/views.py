@@ -10,6 +10,7 @@ from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 
 from TweetManagement.models import Tweet, TweetPhoto, Likes, Comment
 from TweetManagement.serializers import TweetSerializer
@@ -55,7 +56,7 @@ def create_tweet(request):
     except Exception as e:
         return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"},
                             status=status.HTTP_400_BAD_REQUEST)
-    return JsonResponse({"status": "success", "message": "Tweet created successfully"}, status=status.HTTP_201_CREATED)
+    return JsonResponse({"status": "success", "message": "Tweet created successfully", "tweet_id": tweet.tweet_id}, status=status.HTTP_201_CREATED)
 
 
 @csrf_exempt
@@ -208,4 +209,5 @@ def get_comment(request):
         "sender": comment.sender.username,
         "content": comment.content,
         "createTime": comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        "children_comment": list(Comment.objects.filter(target_comment=comment).values_list('comment_id', flat=True))
     }},  status=status.HTTP_200_OK)
