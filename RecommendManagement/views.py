@@ -19,8 +19,8 @@ from UserManagement.models import User
 @authentication_classes([TokenAuthentication])
 def recommend_subscribe(request):
     user = request.user
-    desired_position = user.desired_position
-    positions = Position.objects.filter(position_tag=desired_position)
+    desired_position = user.desired_position.all()
+    positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
     user_skills = user.skills.all()
     related_users = User.objects.filter(skills__in=user_skills).exclude(username=user.username).annotate(num_common_skills=Count('skills')).filter(num_common_skills__gt=0).order_by('-num_common_skills')
     related_companies = []
@@ -60,8 +60,10 @@ def recommend_subscribe(request):
 def recommend_position(request):
     user = request.user
     recommends = []
-    if user.desired_position:
-        related_positions = Position.objects.filter(position_tag=user.desired_position)
+    desired_position = user.desired_position.all()
+    if desired_position:
+        related_positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
+
         for related_position in related_positions:
             recommends.append(PositionSerializer(related_position).data)
     else:
