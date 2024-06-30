@@ -10,7 +10,7 @@ from CompanyManagement.models import Company
 from PositionManagement.models import Position
 from PositionManagement.serializer import PositionSerializer
 from UserManagement.models import User
-
+from shared.decorators import require_position
 
 # Create your views here.
 @csrf_exempt
@@ -18,7 +18,7 @@ from UserManagement.models import User
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 def recommend_subscribe(request):
-    user = request.user
+    user = User.objects.get(username =request.user.username)
     desired_position = user.desired_position.all()
     positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
     user_skills = user.skills.all()
@@ -58,7 +58,7 @@ def recommend_subscribe(request):
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 def recommend_position(request):
-    user = request.user
+    user = User.objects.get(username =request.user.username)
     recommends = []
     desired_position = user.desired_position.all()
     if desired_position:
@@ -67,7 +67,7 @@ def recommend_position(request):
         for related_position in related_positions:
             recommends.append(PositionSerializer(related_position).data)
     else:
-        latest_positions = Position.objects.filter().order_by('-created_at')[:9]
+        latest_positions = Position.objects.filter().order_by('-posted_at')[:9]
         for latest_position in latest_positions:
             recommends.append(PositionSerializer(latest_position).data)
     return JsonResponse({"status": "success", "data": recommends}, status=200)
@@ -75,11 +75,8 @@ def recommend_position(request):
 
 @csrf_exempt
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
 @require_position
 def recommend_simposition(request):
-    user = request.user
     position = request.position_object
     recommends = []
     desired_position = position.position_tag
@@ -89,7 +86,7 @@ def recommend_simposition(request):
         for related_position in related_positions:
             recommends.append(PositionSerializer(related_position).data)
     else:
-        latest_positions = Position.objects.filter().order_by('-created_at')[:9]
+        latest_positions = Position.objects.filter().order_by('-posted_at')[:9]
         for latest_position in latest_positions:
             recommends.append(PositionSerializer(latest_position).data)
     return JsonResponse({"status": "success", "data": recommends}, status=200)
