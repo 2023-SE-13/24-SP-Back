@@ -246,11 +246,11 @@ def create_offer(request):
     offer.offer_at = utc8time
     offer.save()
     application.offer = offer
-    create_notification({
+    create_notification(json.dumps({
         "username": application.user.username,
         "notification_type": "system",
         "content": f"You have received an offer from {company.company_name} for {position.position_name}",
-    })
+    }))
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 
 @csrf_exempt
