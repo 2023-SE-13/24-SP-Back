@@ -10,7 +10,7 @@ from CompanyManagement.models import Company
 from PositionManagement.models import Position
 from PositionManagement.serializer import PositionSerializer
 from UserManagement.models import User
-
+from shared.decorators import require_position
 
 # Create your views here.
 @csrf_exempt
