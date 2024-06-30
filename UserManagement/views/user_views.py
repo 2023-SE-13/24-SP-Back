@@ -187,7 +187,7 @@ def update_user(request):
         if desired_position:
             current_user.desired_position.clear()
             for positiontag in desired_position:
-                current_user.desired_position.add(PositionTag.objects.get(name=positiontag))
+                current_user.desired_position.add(PositionTag.objects.get(category=positiontag.get('category'), specialization=positiontag.get('specialization')))
         # 保存更改
         current_user.save()
         return JsonResponse({"status": "success", "message": "Profile updated successfully"}, status=status.HTTP_200_OK)
