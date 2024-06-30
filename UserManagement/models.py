@@ -28,6 +28,7 @@ class User(AbstractUser):
     skills = models.ManyToManyField(Skill, blank=True)
     salary_min = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # 最低薪资
     salary_max = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # 最高薪资
+    avatar = models.ImageField(upload_to='resources/avatars/', null=True, blank=True)
 
     class Meta:
         db_table = 'Users'
@@ -44,6 +45,7 @@ class VerificationCode(models.Model):
 
     def __str__(self):
         return self.email
+
 
 
 class Message(models.Model):
