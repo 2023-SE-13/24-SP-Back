@@ -65,7 +65,7 @@ def create_position(request):
     company_subscriber = SubscribeCompany.objects.filter(company=company)
     for subscriber in company_subscriber:
         create_notification(json.dumps({
-            "username": subscriber.cur_user.username,
+            "username": subscriber.user.username,
             "notification_type": "subscribe",
             "content": f"Company {company.company_name} has created a new position",
             "position_id": str(position.position_id)
