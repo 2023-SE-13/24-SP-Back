@@ -35,11 +35,14 @@ def get_notification(request):
         }
     elif notification.notification_type == 'subscribe':
         tweet = notification.tweet
+        position = notification.position
         tweet_id = tweet.tweet_id
+        position_id = position.position_id
         notification_data = {
             "notification_id": notification.notification_id,
             "notification_type": "subscribe",
             "tweet_id": tweet_id,
+            "position_id": position_id,
             "created_at": notification.created_at,
             "content": notification.content,
         }

@@ -9,11 +9,9 @@ class TweetSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     comment_array = serializers.SerializerMethodField()
     created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
-    is_like = serializers.SerializerMethodField()
- 
     class Meta:
         model = Tweet
-        fields = ('tweet_id', 'user', 'text_content', 'created_at', 'likes', 'is_like', 'comments', 'photos', 'comment_array')
+        fields = ('tweet_id', 'user', 'text_content', 'created_at', 'likes', 'comments', 'photos', 'comment_array')
     def get_photos(self, obj):
         tweet_photos = TweetPhoto.objects.filter(tweet=obj)
         photos = []
@@ -34,8 +32,3 @@ class TweetSerializer(serializers.ModelSerializer):
                 comment_array.append(comment.comment_id)
         return comment_array
     
-    def get_is_like(self, obj):
-        if Likes.objects.filter(tweet=obj, user=obj.user).exists():
-            return True
-        else:
-            return False

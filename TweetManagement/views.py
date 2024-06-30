@@ -41,21 +41,19 @@ def create_tweet(request):
     try:
         # 从请求中获取图片文件列表
         photos = request.FILES.getlist('photos', None)
-        if not photos:
-            return JsonResponse({"status": "error", "message": "No photo file provided"},
-                                status=status.HTTP_400_BAD_REQUEST)
-        i = 0
-        for photo in photos:
-            # 创建新的推文图片文件名
-            photo_type = photo.name.split('.')[-1]
-            new_filename = f"{tweet.tweet_id}_tweetphoto_{i}.{photo_type}"
-            i = i + 1
-            # 读取和保存新文件
-            new_file = ContentFile(photo.read())
-            new_file.name = new_filename
-            tweet_photo = TweetPhoto.objects.create(tweet=tweet)
-            # 保存
-            tweet_photo.photo.save(new_filename, new_file, save=True)
+        if photos:
+            i = 0
+            for photo in photos:
+                # 创建新的推文图片文件名
+                photo_type = photo.name.split('.')[-1]
+                new_filename = f"{tweet.tweet_id}_tweetphoto_{i}.{photo_type}"
+                i = i + 1
+                # 读取和保存新文件
+                new_file = ContentFile(photo.read())
+                new_file.name = new_filename
+                tweet_photo = TweetPhoto.objects.create(tweet=tweet)
+                # 保存
+                tweet_photo.photo.save(new_filename, new_file, save=True)
     except Exception as e:
         return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -219,10 +217,17 @@ def get_tweet_comment(request):
 
 @csrf_exempt
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
 @require_tweet
 def get_tweet(request):
     tweet = request.tweet_object
-    return JsonResponse({"status": "success", "data": TweetSerializer(tweet).data}, status=status.HTTP_200_OK)
+    data = TweetSerializer(tweet).data
+    if Likes.objects.filter(tweet=tweet, user=request.user).exists():
+        data["is_like"] = True
+    else:
+        data["is_like"] = False
+    return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
 
 
 @csrf_exempt

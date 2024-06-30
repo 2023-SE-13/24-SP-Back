@@ -14,7 +14,10 @@ from CompanyManagement.models import CompanyMember
 from NotificationCenter.models import Notification
 from NotificationCenter.views.utils.notifications import create_notification
 from PositionManagement.models import Position, Application, Offer
+from NotificationCenter.views.utils.notifications import create_notification
+from PositionManagement.models import Position, Application
 from PositionManagement.serializer import PositionSerializer
+from Subscribe.models import SubscribeCompany, SubscribeUser
 from UserManagement.models import User, Skill, PositionTag
 from shared.decorators import require_position, require_company
 
@@ -57,6 +60,17 @@ def create_position(request):
     for skill in skill_required:
         position.skill_required.add(Skill.objects.get(name=skill))
     position.save()
+    # 向关注该用户所属公司的所有用户推送通知
+
+    company_subscriber = SubscribeCompany.objects.filter(company=company)
+    for subscriber in company_subscriber:
+        create_notification(json.dumps({
+            "username": subscriber.cur_user.username,
+            "notification_type": "subscribe",
+            "content": f"Company {company.company_name} has created a new position",
+            "position_id": str(position.position_id)
+        }))
+
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 
 
