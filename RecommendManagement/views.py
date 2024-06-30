@@ -26,7 +26,7 @@ def recommend_subscribe(request):
     related_users = User.objects.filter(skills__in=user_skills).exclude(username=user.username).annotate(num_common_skills=Count('skills')).filter(num_common_skills__gt=0).order_by('-num_common_skills')
     related_companies = []
     for position in positions:  
-        related_companies.append(position.company.company_id)
+        related_companies.append(position.company)
     recommends = {
         "users": [],
         "companies": []
