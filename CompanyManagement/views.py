@@ -66,7 +66,7 @@ def create_company(request):
 
     # 将创建者加入Company
     user = request.user
-    company_member = CompanyMember(company=company, user=user, role='Creator')
+    company_member = CompanyMember(company=company, user=user, role='Admin')
     company_member.save()
     user.is_staff = True
     user.save()
@@ -128,7 +128,7 @@ def add_company_member(request):
 def delete_staff(request):
     current_user = request.user
     company = request.company_object
-    if CompanyMember.objects.get(company=company, user=current_user).role != ('Creator' or 'Admin'):
+    if CompanyMember.objects.get(company=company, user=current_user).role != 'Admin':
         return JsonResponse({"status": "error", "message": "You have no permission to delete staff"},
                             status=status.HTTP_400_BAD_REQUEST)
     user_to_delete = request.user_object
@@ -201,14 +201,14 @@ def leave_company(request):
             # 尝试获取company-member对象
             try:
                 member = CompanyMember.objects.get(company=company, user=user)
-                if member.role != 'Creator':
+                if member.role != 'Admin':
                     # 如果找到了，则删除
                     member.delete()
                     user.is_staff = 0  # 或者如果is_staff是布尔字段，可以使用 user_manage_obj.is_staff = False
                     user.save()  # 保存更改
                 # 返回成功的响应
                 else:
-                    return JsonResponse({'status': 'fail', 'message': 'You are Creator!'}, status=405)
+                    return JsonResponse({'status': 'fail', 'message': 'You are Admin!'}, status=405)
                 return JsonResponse({'status': 'success'})
             except CompanyMember.DoesNotExist:
                 # 如果没有找到，则返回失败的响应
@@ -299,7 +299,7 @@ def transfer_admin(request):
         if company_member.role == 'Staff':
             # 完美符合，可以转让
             CompanyMember.objects.get(company=company, user=admin_user).update(role='Staff')
-            company_member.update(role='Creator')
+            company_member.update(role='Admin')
             return JsonResponse({"status": "success"}, status=status.HTTP_200_OK)
         else:
             return JsonResponse({"status": "error", "message": "Target user's is not a staff"},
