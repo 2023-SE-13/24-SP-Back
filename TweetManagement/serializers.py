@@ -27,7 +27,7 @@ class TweetSerializer(serializers.ModelSerializer):
         return obj.user.username if obj else None
     
     def get_comment_array(self, obj):
-        comments = Comment.objects.filter(tweet=obj).order_by('created_at')
+        comments = Comment.objects.filter(tweet=obj).order_by('-created_at')
         comment_array = []
         for comment in comments:
             if comment.target_comment is None:
