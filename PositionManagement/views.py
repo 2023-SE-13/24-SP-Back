@@ -1,6 +1,7 @@
 import json
 
 import pytz
+from django.db.models import Q
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -320,3 +321,19 @@ def update_offer(request):
         Application.objects.filter(application_id=offer.application.application_id).update(result='Offer Rejected')
         offer.save()
         return JsonResponse({'status': 'success', "message": "Offer Rejected"}, status=status.HTTP_200_OK)
+
+@csrf_exempt
+@api_view(['POST'])
+def search_position(request):
+    data = json.loads(request.body.decode('utf-8'))
+    keywords = data.get('keywords', None).split()
+    query = Q()
+    if not keywords:
+        return JsonResponse({"status": "error", "message": "keyword is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+    for keyword in keywords:
+        for field in ['position_name', 'position_description']:
+            query |= Q(**{f'{field}__icontains': keyword})
+    results = Position.objects.filter(query).values()
+    return JsonResponse({"status": "success", "data": PositionSerializer(results, many=True).data},
+                        status=status.HTTP_200_OK)
