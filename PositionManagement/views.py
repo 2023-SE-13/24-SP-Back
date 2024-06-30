@@ -251,6 +251,8 @@ def create_offer(request):
         "username": application.user.username,
         "notification_type": "system",
         "content": f"You have received an offer from {company.company_name} for {position.position_name}",
+        "company_id": company.company_id,
+        "position_id": position.position_id,
     }))
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 

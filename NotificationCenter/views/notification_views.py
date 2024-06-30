@@ -73,8 +73,20 @@ def get_user_notifications(request):
     elif require_type == 'system':
         notifications = Notification.objects.filter(user=user, notification_type='system')
 
-    serializer = NotificationSerializer(notifications, many=True)
-    return Response({"status": "success", "data": serializer.data}, status=status.HTTP_200_OK)
+    # serializer = NotificationSerializer(notifications, many=True)
+    data = []
+    for notification in notifications:
+        data.append({
+            "notification_id": notification.notification_id,
+            "notification_type": notification.notification_type,
+            "is_read": notification.is_read,
+            "created_at": notification.created_at,
+            "content": notification.content,
+            "company_name": notification.company.company_name if notification.company else None,
+            "username": notification.user.username,
+            "position_name": notification.position.position_name if notification.position else None,
+        })
+    return Response({"status": "success", "data": data}, status=status.HTTP_200_OK)
 
 
 @csrf_exempt
