@@ -39,6 +39,18 @@ def recommend_subscribe(request):
         recommends['companies'].append({
             "company_name": company.company_name,
         })
+    if related_users.count() < 5:
+        hotest_users = User.objects.filter().order_by('-user_subscription')[:5-related_users.count()]
+        for hotest_user in hotest_users:
+            recommends['users'].append({
+                "username": hotest_user.username,
+            })
+    if related_companies.count() < 5:
+        hotest_companies = Company.objects.filter().order_by('-company_subscription')[:5-related_companies.count()]
+        for hotest_company in hotest_companies:
+            recommends['companies'].append({
+                "company_name": hotest_company.company_name,
+            })
     return JsonResponse({"status": "success", "data": recommends}, status=200)
 
 @csrf_exempt
@@ -47,11 +59,15 @@ def recommend_subscribe(request):
 @authentication_classes([TokenAuthentication])
 def recommend_position(request):
     user = request.user
-    related_positions = Position.objects.filter(position_tag=user.desired_position)
     recommends = []
-    for related_position in related_positions:
-        recommends.append(PositionSerializer(related_position).data)
-        
+    if user.desired_position:
+        related_positions = Position.objects.filter(position_tag=user.desired_position)
+        for related_position in related_positions:
+            recommends.append(PositionSerializer(related_position).data)
+    else:
+        latest_positions = Position.objects.filter().order_by('-created_at')[:9]
+        for latest_position in latest_positions:
+            recommends.append(PositionSerializer(latest_position).data)
     return JsonResponse({"status": "success", "data": recommends}, status=200)
 
 
