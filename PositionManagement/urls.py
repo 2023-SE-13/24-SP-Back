@@ -14,4 +14,5 @@ urlpatterns = [
     path('get_offer_list', get_offer_list),
     path('update_offer', update_offer),
     path('refuse_application', refuse_application),
+    path('search_position', search_position),
 ]
