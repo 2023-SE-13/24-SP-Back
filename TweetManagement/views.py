@@ -209,4 +209,5 @@ def get_comment(request):
         "sender": comment.sender.username,
         "content": comment.content,
         "createTime": comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        "children_comment": list(Comment.objects.filter(target_comment=comment).values_list('comment_id', flat=True))
     }},  status=status.HTTP_200_OK)
