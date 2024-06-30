@@ -344,5 +344,5 @@ def search_position(request):
             'company_name': position.company.company_name,
 
         })
-    return JsonResponse({"status": "success", "data": PositionSerializer(results, many=True).data},
+    return JsonResponse({"status": "success", "data": data},
                         status=status.HTTP_200_OK)
