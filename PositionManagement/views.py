@@ -334,6 +334,15 @@ def search_position(request):
     for keyword in keywords:
         for field in ['position_name', 'position_description']:
             query |= Q(**{f'{field}__icontains': keyword})
-    results = Position.objects.filter(query).values()
+    positions = Position.objects.filter(query)
+
+    data = []
+    for position in positions:
+        data.append({
+            'position_id': position.position_id,
+            'position_name': position.position_name,
+            'company_name': position.company.company_name,
+
+        })
     return JsonResponse({"status": "success", "data": PositionSerializer(results, many=True).data},
                         status=status.HTTP_200_OK)
