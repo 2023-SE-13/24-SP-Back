@@ -195,6 +195,32 @@ def get_position_applications(request):
 
 
 @csrf_exempt
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def refuse_application(request):
+    data = json.loads(request.body.decode('utf-8'))
+    cur_user = request.user
+    application = Application.objects.filter(application_id=data.get('application_id')).first()
+    if application is None:
+        return JsonResponse({"status": "error", "message": "Application does not exist"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    position = application.position
+    company = position.company
+    cm = CompanyMember.objects.filter(user=cur_user, company=company).first()
+    if cm is None or cm.role == 'Staff':
+        return JsonResponse({"status": "error", "message": "You are not allowed to refuse application"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    Application.objects.filter(application_id=application.application_id).delete()
+    create_notification({
+        "username": application.user.username,
+        "notification_type": "system",
+        "content": f"Your application for {position.position_name} has been refused by {company.company_name}",
+    })
+    return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
+
+
+@csrf_exempt
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
