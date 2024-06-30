@@ -21,6 +21,7 @@ def save_message(request):
     receiver_uname = data.get('receiver_uname')
     conversation_id = data.get('conversation_id')
     content = data.get('content')
+    print(data)
     tz = pytz.timezone('Asia/Shanghai')
     timestamp = timezone.now().astimezone(tz)
     if not all([sender_uname, receiver_uname, content, conversation_id]):
@@ -31,9 +32,9 @@ def save_message(request):
         return JsonResponse({'status': 'error', 'message': 'Sender or receiver is not in the conversation'}, status=400)
 
     message = Message.objects.create(sender=User.objects.get(username=sender_uname),
-                                        receiver=User.objects.get(username=receiver_uname),
-                                        conversation=Conversation.objects.get(conversation_id=conversation_id),
-                                        content=content, timestamp=timestamp)
+                                     receiver=User.objects.get(username=receiver_uname),
+                                     conversation=Conversation.objects.get(conversation_id=conversation_id),
+                                     content=content, timestamp=timestamp)
     con.last_message_time = timestamp
     con.save()
     return JsonResponse({'status': 'success', 'message_id': message.message_id, 'timestamp': timestamp},
@@ -60,12 +61,14 @@ def create_conversation(request):
     sender = request.user
     receiver = request.user_object
     if sender.username == receiver.username:
-        return JsonResponse({"status": "error", "message": "You cannot create a private chat with yourself", "conversation_id": ""},
-                            status=status.HTTP_400_BAD_REQUEST)
+        return JsonResponse(
+            {"status": "error", "message": "You cannot create a private chat with yourself", "conversation_id": ""},
+            status=status.HTTP_400_BAD_REQUEST)
     if Conversation.objects.filter(user1__in={sender, receiver}, user2__in={sender, receiver}).exists():
         return JsonResponse({"status": "success",
                              "message": "Private chat already exists",
-                             "conversation_id": Conversation.objects.get(Q(user1=sender, user2=receiver) | Q(user1=receiver, user2=sender)).conversation_id},
+                             "conversation_id": Conversation.objects.get(
+                                 Q(user1=sender, user2=receiver) | Q(user1=receiver, user2=sender)).conversation_id},
                             status=status.HTTP_200_OK)
     tz = pytz.timezone('Asia/Shanghai')
     utc8time = timezone.now().astimezone(tz)
@@ -87,4 +90,3 @@ def get_messages(request):
     messages = Message.objects.filter(conversation_id=conversation_id).order_by('timestamp')
     serializer = MessageSerializer(messages, many=True)
     return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
-
