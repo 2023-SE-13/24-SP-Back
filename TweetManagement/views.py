@@ -240,10 +240,9 @@ def get_comment(request):
 
 @csrf_exempt
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
+@require_user
 def get_user_tweet(request):
-    user = request.user
+    user = request.user_object
     user_tweets = Tweet.objects.filter(user=user).order_by('-created_at')
     data = []
     for user_tweet in user_tweets:
