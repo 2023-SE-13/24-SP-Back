@@ -28,4 +28,5 @@ urlpatterns = [
     path('api/position/', include('PositionManagement.urls')),
     path('api/tweet/', include('TweetManagement.urls')),
     path('api/recommend/', include('RecommendManagement.urls')),
+    path('api/notification/', include('NotificationCenter.urls')),
 ]
