@@ -208,6 +208,8 @@ def get_tweet_comment(request):
 
 @csrf_exempt
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
 @require_tweet
 def get_tweet(request):
     tweet = request.tweet_object
