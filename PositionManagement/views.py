@@ -64,6 +64,38 @@ def get_position(request):
 
 
 @csrf_exempt
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def update_position(request):
+    data = json.loads(request.body.decode('utf-8'))
+    cur_user = request.user
+    cm = CompanyMember.objects.filter(user=cur_user).first()
+    if cm is None or cm.role == 'Staff':
+        return JsonResponse({"status": "error", "message": "You are not allowed to update position"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    position = Position.objects.filter(position_id=data.get('position_id')).first()
+    if position is None or position.company != cm.company:
+        return JsonResponse({"status": "error", "message": "You are not allowed to update position"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    try:
+        fields_to_update = ['position_name', 'position_description', 'location', 'education_requirement']
+        for field in fields_to_update:
+            if data.get(field):
+                setattr(position, field, data.get(field))
+        skill_required = data.get('skill_required')
+        if skill_required:
+            position.skill_required.clear()
+            for skill in skill_required:
+                position.skill_required.add(Skill.objects.get(name=skill))
+        position.save()
+        return JsonResponse({"status": "success", "message": "Position updated successfully"},
+                            status=status.HTTP_200_OK)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@csrf_exempt
 @api_view(['DELETE'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])

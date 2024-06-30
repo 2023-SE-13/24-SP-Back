@@ -8,4 +8,5 @@ urlpatterns = [
     path('get_position_list', get_position_list),
     path('apply_position', apply_position),
     path('get_pos_apy', get_position_applications),
+    path('update_position', update_position),
 ]
