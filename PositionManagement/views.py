@@ -185,6 +185,7 @@ def get_position_applications(request):
     result = []
     for application in applications:
         result.append({
+            'application_id': application.application_id,
             'username': application.user.username,
             'real_name': application.user.real_name,
             'education': application.user.education,
