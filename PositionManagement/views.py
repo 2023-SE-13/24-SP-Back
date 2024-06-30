@@ -45,12 +45,11 @@ def create_position(request):
             status=status.HTTP_406_NOT_ACCEPTABLE)
     position = Position(company=company, position_name=position_name, position_description=position_description,
                         location=location, education_requirement=education_requirement, salary_min=salary_min,
-                        salary_max=salary_max)
+                        salary_max=salary_max, hr=cur_user)
     position.save()
     for skill in skill_required:
         position.skill_required.add(Skill.objects.get(name=skill))
     position.save()
-    print(position.skill_required.all())
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 
 
