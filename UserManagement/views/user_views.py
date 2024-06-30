@@ -17,7 +17,7 @@ import json
 
 from CompanyManagement.models import CompanyMember
 from UserManagement.serializers import UserSerializer
-from UserManagement.models import User, VerificationCode, Skill
+from UserManagement.models import User, VerificationCode, Skill, PositionTag
 from shared.decorators import require_user
 from shared.utils.UserManage.users import get_user_by_username, get_user_by_email
 from shared.utils.email import send_email
@@ -45,8 +45,6 @@ def login(request):
 
     try:
         user = User.objects.get(username=username)
-        print(type(user))
-        print(user)
         if check_password(password, user.password):
             token, created = Token.objects.get_or_create(user=user)
             return JsonResponse({"status": "success", "token": str(token.key)}, status=status.HTTP_201_CREATED)
@@ -174,7 +172,7 @@ def update_user(request):
 
     # 在这里进行实际的更新操作
     try:
-        fields_to_update = ['password', 'real_name', 'email', 'education', 'desired_position', 'blog_link',
+        fields_to_update = ['password', 'real_name', 'email', 'education', 'blog_link',
                             'repository_link', 'desired_work_city', 'salary_min', 'salary_max']
 
         for field in fields_to_update:
@@ -214,7 +212,7 @@ def search_users(request):
     if keyword:
         # 创建查询条件，搜索多个字段
         query = Q(username__icontains=keyword)  | \
-                Q(education__icontains=keyword) | Q(desired_position__icontains=keyword)
+                Q(education__icontains=keyword)
         users = User.objects.filter(query)
     else:
         # 如果没有提供关键词，则返回所有用户
@@ -228,7 +226,6 @@ def search_users(request):
             "username": user.username,
             "real_name": user.real_name,
             "education": user.education,
-            "desired_position": user.desired_position,
             "blog_link": user.blog_link,
             "repository_link": user.repository_link,
             "company_name": company_name
