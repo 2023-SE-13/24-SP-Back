@@ -19,7 +19,7 @@ class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True, primary_key=True)
     real_name = models.CharField(max_length=255)
     education = models.CharField(max_length=255, null=True)
-    desired_position = models.CharField(max_length=255, null=True) #Tag
+    desired_position = models.ManyToManyField('PositionManagement.PositionTag', blank=True, null=True)
     blog_link = models.CharField(max_length=255, null=True)
     repository_link = models.CharField(max_length=255, null=True)
     user_subscription = models.IntegerField(default=0)
@@ -29,6 +29,8 @@ class User(AbstractUser):
     salary_min = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # 最低薪资
     salary_max = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # 最高薪资
     avatar = models.ImageField(upload_to='resources/avatars/', null=True, blank=True)
+    years_of_service = models.IntegerField(null=True, blank=True)
+    cur_position = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         db_table = 'Users'

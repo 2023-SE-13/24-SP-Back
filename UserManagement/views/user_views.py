@@ -18,6 +18,7 @@ import json
 from CompanyManagement.models import CompanyMember
 from UserManagement.serializers import UserSerializer
 from UserManagement.models import User, VerificationCode, Skill
+from PositionManagement.models import PositionTag
 from shared.decorators import require_user
 from shared.utils.UserManage.users import get_user_by_username, get_user_by_email
 from shared.utils.email import send_email
@@ -180,11 +181,16 @@ def update_user(request):
         for field in fields_to_update:
             if data.get(field) is not None and getattr(current_user, field) != data.get(field):
                 setattr(current_user, field, data.get(field))
+        desired_position = data.get('desired_position')
         skills = data.get('skills')
         if skills:
             current_user.skills.clear()
             for skill in skills:
                 current_user.skills.add(Skill.objects.get(name=skill))
+        if desired_position:
+            current_user.desired_position.clear()
+            for positiontag in desired_position:
+                current_user.desired_position.add(PositionTag.objects.get(name=positiontag))
         # 保存更改
         current_user.save()
         return JsonResponse({"status": "success", "message": "Profile updated successfully"}, status=status.HTTP_200_OK)
