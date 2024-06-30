@@ -6,15 +6,18 @@ from .models import *
 class UserSerializer(serializers.ModelSerializer):
     company_id = serializers.SerializerMethodField()
     role = serializers.SerializerMethodField()
+    resume_uploaded = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = ('username', 'email', 'real_name', 'is_staff',
-                  'education', 'desired_position', 'blog_link', 'repository_link', 'company_id', 'role', 'skills', 'years_of_service', 'cur_position', 'school', 'age')
+                  'education', 'desired_position', 'blog_link', 'repository_link', 'company_id', 'role', 'skills',
+                  'years_of_service', 'cur_position', 'school', 'age', 'resume_uploaded')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['skills'] = [skill.name for skill in instance.skills.all()]
+        representation['resume_uploaded'] = True if instance.resume else False
         if instance.desired_position:
             #返回一个列表，每个元素是一个json，包括category和specialization
             representation['desired_position'] = [{'category': tag.category, 'specialization': tag.specialization} for tag in instance.desired_position.all()]
@@ -30,6 +33,9 @@ class UserSerializer(serializers.ModelSerializer):
     def get_role(self, obj):
         company_member = CompanyMember.objects.filter(user=obj).first()
         return company_member.role if company_member else ""
+
+    def get_resume_uploaded(self, obj):
+        return True if obj.resume else False
 
 
 class MessageSerializer(serializers.ModelSerializer):
