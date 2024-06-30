@@ -2,6 +2,7 @@ import json
 import uuid
 from django.utils import timezone
 
+from CompanyManagement.models import Company
 from NotificationCenter.models import Notification
 from PositionManagement.models import Position
 from TweetManagement.models import Tweet
@@ -52,11 +53,17 @@ def create_notification(json_str):
                 created_at=timezone.now()
             )
         elif notification_type == "system":
+            company_id = data.get('company_id')
+            company = Company.objects.get(company_id=company_id)
+            position_id = data.get('position_id')
+            position = Position.objects.get(position_id=position_id)
             notification = Notification.objects.create(
                 notification_id=notification_id,
                 user=user,
                 notification_type=notification_type,
                 content=content,
+                company=company,
+                position=position,
                 created_at=timezone.now()
             )
 
