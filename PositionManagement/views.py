@@ -169,7 +169,6 @@ def get_position_applications(request):
             'username': application.user.username,
             'real_name': application.user.real_name,
             'education': application.user.education,
-            'desired_position': application.user.desired_position,
             'skills': [skill.name for skill in application.user.skills.all()],
             'applied_at': application.applied_at,
         })
