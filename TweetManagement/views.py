@@ -211,7 +211,7 @@ def get_comment(request):
         "createTime": comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
         "children_comment": [],
     }
-    children_comment = Comment.objects.filter(target_comment=comment)
+    children_comment = Comment.objects.filter(target_comment=comment).order_by('-created_at')
     for child in children_comment:
         child_data = {
             "comment_id": child.comment_id,
