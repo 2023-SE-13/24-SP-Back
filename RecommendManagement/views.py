@@ -81,7 +81,7 @@ def recommend_simposition(request):
     recommends = []
     desired_position = position.position_tag
     if desired_position:
-        related_positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
+        related_positions = Position.objects.filter(position_tag=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).exclude(position_id=position.position_id).order_by('-num_common_position_tag')
 
         for related_position in related_positions:
             recommends.append(PositionSerializer(related_position).data)

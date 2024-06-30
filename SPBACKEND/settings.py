@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'TweetManagement.apps.TweetManagementConfig',
     'PositionManagement.apps.PositionManagementConfig',
     'RecommendManagement.apps.RecommendManagementConfig',
+    'NotificationCenter.apps.NotificationCenterConfig',
 ]
 
 MIDDLEWARE = [
