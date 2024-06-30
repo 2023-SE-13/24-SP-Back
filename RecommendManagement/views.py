@@ -50,11 +50,8 @@ def recommend_position(request):
     related_positions = Position.objects.filter(position_tag=user.desired_position)
     recommends = []
     for related_position in related_positions:
-        # recommends.append(PositionSerializer(related_position).data)
-        recommends.append({
-			"position_id": related_position.position_id,
-			"position_name": related_position.position_name, 
-		})
+        recommends.append(PositionSerializer(related_position).data)
+        
     return JsonResponse({"status": "success", "data": recommends}, status=200)
 
 
