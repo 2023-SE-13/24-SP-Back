@@ -1,3 +1,4 @@
+import os
 from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -6,7 +7,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
 
-from CompanyManagement.models import Company
+from CompanyManagement.models import Company, CompanyMember
 from PositionManagement.models import Position
 from PositionManagement.serializer import PositionSerializer
 from UserManagement.models import User
@@ -31,25 +32,40 @@ def recommend_subscribe(request):
         "companies": []
     }
     for related_user in related_users:
+        company_member = CompanyMember.objects.filter(user=related_user).first()
+        company_name = ""
+        if company_member:
+            company_name = company_member.company.company_name
         recommends['users'].append({
             "username": related_user.username,
+            "avatar": os.path.basename(related_user.avatar.name) if related_user.avatar.name else "",
+            "company_name": company_name,
         })
     for related_company in related_companies:
-        company = Company.objects.get(company_id=related_company)
         recommends['companies'].append({
-            "company_name": company.company_name,
+            "company_id": related_company.company_id,
+            "company_name": os.path.basename(related_company.company_name) if related_company.company_name else "",
+            "company_image": related_company.company_image.name,
         })
     if len(related_users) < 5:
         hotest_users = User.objects.filter().order_by('-user_subscription')[:5-len(related_users)]
         for hotest_user in hotest_users:
+            company_member = CompanyMember.objects.filter(user=hotest_user).first()
+            company_name = ""
+            if company_member:
+                company_name = company_member.company.company_name
             recommends['users'].append({
                 "username": hotest_user.username,
+                "avatar": os.path.basename(hotest_user.avatar.name) if hotest_user.avatar.name else "",
+                "company_name": company_name,
             })
     if len(related_companies) < 5:
         hotest_companies = Company.objects.filter().order_by('-company_subscription')[:5-len(related_companies)]
         for hotest_company in hotest_companies:
             recommends['companies'].append({
+                "company_id": hotest_company.company_id,
                 "company_name": hotest_company.company_name,
+                "company_image": os.path.basename(hotest_company.company_image.name) if hotest_company.company_image.name else "",
             })
     return JsonResponse({"status": "success", "data": recommends}, status=200)
 

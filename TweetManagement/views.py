@@ -236,3 +236,17 @@ def get_comment(request):
         data["children_comment"].append(child_data)
     
     return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(['GET'])
+@require_user
+def get_user_tweet(request):
+    user = request.user_object
+    user_tweets = Tweet.objects.filter(user=user).order_by('-created_at')
+    data = []
+    for user_tweet in user_tweets:
+        data.append(
+            user_tweet.tweet_id
+        )
+    return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
