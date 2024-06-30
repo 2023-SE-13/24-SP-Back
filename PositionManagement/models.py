@@ -19,7 +19,7 @@ class Position(models.Model):
     skill_required = models.ManyToManyField(Skill, blank=True)
     position_tag = models.ForeignKey(PositionTag, on_delete=models.CASCADE, null=True, blank=True)
     hr = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)  # 关联 HR 用户
- 
+
     class Meta:
         db_table = 'Positions'
 
@@ -41,6 +41,7 @@ class Application(models.Model):
     position = models.ForeignKey('Position', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     applied_at = models.DateTimeField()
+    offer = models.ForeignKey('Offer', on_delete=models.CASCADE, null=True, blank=True, default=None, related_name='applications')
     result = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
@@ -55,4 +56,29 @@ class Application(models.Model):
             local_tz = pytz.timezone('Asia/Shanghai')
             local_time = utc_time.astimezone(local_tz)
             self.applied_at = local_time
+        super().save(*args, **kwargs)
+
+
+class Offer(models.Model):
+    offer_id = models.UUIDField(primary_key=True, auto_created=True, unique=True, editable=False,
+                                default=uuid.uuid4)
+    application = models.ForeignKey(Application, on_delete=models.CASCADE, null=True, blank=True,  related_name='offers')
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE)
+    position = models.ForeignKey(Position, on_delete=models.CASCADE)
+    offer_at = models.DateTimeField()
+    is_accepted = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = 'offers'
+
+    def __str__(self):
+        return f"Offer for {self.application.position.position_name} to {self.application.user.username}"
+
+    def save(self, *args, **kwargs):
+        if not self.offer_at:
+            utc_time = timezone.now()
+            local_tz = pytz.timezone('Asia/Shanghai')
+            local_time = utc_time.astimezone(local_tz)
+            self.offer_at = local_time
         super().save(*args, **kwargs)

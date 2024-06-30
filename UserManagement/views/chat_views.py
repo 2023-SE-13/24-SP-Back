@@ -84,7 +84,7 @@ def get_messages(request):
     conversation_id = request.GET.get('conversation_id')
     if not conversation_id:
         return JsonResponse({'status': 'error', 'message': 'Missing conversation_id parameter'}, status=400)
-    messages = Message.objects.filter(conversation_id=conversation_id).order_by('-timestamp')
+    messages = Message.objects.filter(conversation_id=conversation_id).order_by('timestamp')
     serializer = MessageSerializer(messages, many=True)
     return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
 
