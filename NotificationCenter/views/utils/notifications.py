@@ -1,9 +1,10 @@
 import json
 import uuid
 from django.utils import timezone
+
 from NotificationCenter.models import Notification
-from ProjectExecution.models import Doc
-from TeamManagement.models import User, Message
+from TweetManagement.models import Tweet
+from UserManagement.models import User, Message
 
 
 def create_notification(json_str):
@@ -15,18 +16,18 @@ def create_notification(json_str):
         notification_type = data.get('notification_type')
         content = data.get('content')
         notification = None
-        if notification_type == "document":
-            doc_id = data.get('doc_id')
-            doc = Doc.objects.get(doc_id=doc_id)
+        if notification_type == "subscribe":
+            tweet_id = data.get('tweet_id')
+            tweet = Tweet.objects.get(tweet_id=tweet_id)
             notification = Notification.objects.create(
                 notification_id=notification_id,
                 user=user,
                 notification_type=notification_type,
                 content=content,
-                doc=doc,
+                tweet=tweet,
                 created_at=timezone.now()
             )
-        elif notification_type == "group_chat":
+        elif notification_type == "message":
             message_id = data.get('message_id')
             message = Message.objects.get(message_id=message_id)
             notification = Notification.objects.create(

@@ -1,9 +1,13 @@
+import uuid
+
 from django.db import models
 
+from CompanyManagement.models import Company
+from TweetManagement.models import Tweet
+from UserManagement.models import User, Message
+
+
 # Create your models here.
-
-
-
 class Notification(models.Model):
     TYPE_CHOICES = (
         ('message', 'Message Mention'),
@@ -16,3 +20,6 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     content = models.CharField(max_length=255)
+    tweet = models.ForeignKey(Tweet, related_name='notifications', on_delete=models.CASCADE, null=True)
+    company = models.ForeignKey(Company, related_name='notifications', on_delete=models.CASCADE, null=True)
+    message = models.ForeignKey(Message, related_name='notifications', on_delete=models.CASCADE, null=True)

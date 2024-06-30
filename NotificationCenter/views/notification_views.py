@@ -11,7 +11,7 @@ from rest_framework.response import Response
 from NotificationCenter.models import Notification
 from NotificationCenter.serializers import NotificationSerializer
 from NotificationCenter.views.utils.notifications import create_notification
-from shared.decorators import require_user
+from shared.decorators import require_user, require_company
 
 
 @csrf_exempt
@@ -33,15 +33,13 @@ def get_notification(request):
             "created_at": notification.created_at,
             "content": notification.content,
         }
-    elif notification.notification_type == 'document':
-        doc = notification.doc
-        doc_id = doc.doc_id
+    elif notification.notification_type == 'subscribe':
+        tweet = notification.tweet
+        tweet_id = tweet.tweet_id
         notification_data = {
             "notification_id": notification.notification_id,
-            "notification_type": "document",
-            "doc_id": doc_id,
-            "project_id": doc.project.project_id,
-            "team_id": doc.project.team.team_id,
+            "notification_type": "subscribe",
+            "tweet_id": tweet_id,
             "created_at": notification.created_at,
             "content": notification.content,
         }
@@ -66,9 +64,8 @@ def get_user_notifications(request):
     if require_type == 'ALL':
         notifications = Notification.objects.filter(user=user)
 
-    elif require_type == '@':
-        notifications = Notification.objects. \
-            filter(Q(user=user) & (Q(notification_type='group_chat') | Q(notification_type='document')))
+    elif require_type == 'subscribe':
+        notifications = Notification.objects.filter(user=user, notification_type='subscribe')
 
     elif require_type == 'system':
         notifications = Notification.objects.filter(user=user, notification_type='system')
@@ -121,21 +118,23 @@ def read_all_notifications(request):
     return Response({"status": "success"}, status=status.HTTP_200_OK)
 
 
-@csrf_exempt
-@api_view(['POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-@require_user
-def create_doc_notification(request):
-    current_user = request.user
-    user_to_notice = request.user_object
-    doc_id = request.data.get('doc_id', None)
-    json_str = json.dumps({
-        "username": user_to_notice.username,
-        "notification_type": "document",
-        "doc_id": doc_id,
-        "content": f"{current_user.username} shared a document with you",
-    })
-    notification = create_notification(json_str)
-    return JsonResponse({"status": "success", "message": "Notification created successfully"},
-                        status=status.HTTP_200_OK)
+# @csrf_exempt
+# @api_view(['POST'])
+# @authentication_classes([TokenAuthentication])
+# @permission_classes([IsAuthenticated])
+# @require_user
+# @require_company
+# def create_subscribe_notification(request):
+#     current_user = request.user
+#     subscribe_user = request.user_object
+#     subscribe_company = request.company_object
+#     tweet_id = request.data.get('tweet_id', None)
+#     json_str = json.dumps({
+#         "username": user_to_notice.username,
+#         "notification_type": "document",
+#         "tweet_id": tweet_id,
+#         "content": f"{current_user.username} shared a document with you",
+#     })
+#     notification = create_notification(json_str)
+#     return JsonResponse({"status": "success", "message": "Notification created successfully"},
+#                         status=status.HTTP_200_OK)

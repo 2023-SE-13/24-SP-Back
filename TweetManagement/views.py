@@ -12,6 +12,8 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
+from NotificationCenter.views.utils.notifications import create_notification
+from Subscribe.models import SubscribeUser, SubscribeCompany
 from TweetManagement.models import Tweet, TweetPhoto, Likes, Comment
 from TweetManagement.serializers import TweetSerializer
 from UserManagement.models import User
@@ -56,6 +58,27 @@ def create_tweet(request):
     except Exception as e:
         return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"},
                             status=status.HTTP_400_BAD_REQUEST)
+    # 向关注该用户的所有用户推送通知
+    user_subscribers = SubscribeUser.objects.filter(user_dst=user)
+    for subscriber in user_subscribers:
+        create_notification(json.dumps({
+            "username": subscriber.user_src.username,
+            "notification_type": "tweet",
+            "content": f"User {user.username} has created a new tweet",
+            "tweet_id": tweet.tweet_id
+        }))
+
+    # 向关注该用户所属公司的所有用户推送通知
+    if user.company:
+        company_subscriber = SubscribeCompany.objects.filter(company=user.company)
+        for subscriber in company_subscriber:
+            create_notification(json.dumps({
+                "username": subscriber.user.username,
+                "notification_type": "tweet",
+                "content": f"Company {subscriber.company.company_name} has created a new tweet",
+                "tweet_id": tweet.tweet_id
+            }))
+
     return JsonResponse({"status": "success", "message": "Tweet created successfully", "tweet_id": tweet.tweet_id}, status=status.HTTP_201_CREATED)
 
 
@@ -85,23 +108,13 @@ def switch_tweetlike(request):
 @require_tweet
 def delete_tweet(request):
     tweet = request.tweet_object
+    user = request.user
+    if tweet.user != user:
+        return JsonResponse({"status": "error", "message": "You are not allowed to delete this tweet"},
+                            status=status.HTTP_400_BAD_REQUEST)
     tweet.delete()
     return JsonResponse({"status": "success", "message": "Tweet deleted successfully"}, status=status.HTTP_200_OK)
 
-@csrf_exempt
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([TokenAuthentication])
-def retweet(request):
-    user = request.user
-    data = json.loads(request.body.decode('utf-8'))
-    text_content = data.get('text_content', None)
-    tweet_id = data.get('tweet_id', None)
-    tweet = Tweet.objects.filter(tweet_id=tweet_id).first()
-    Tweet.objects.create(user=user, text_content=text_content, is_retweet=True, retweet_id=tweet)
-    tweet.retweets += 1
-    tweet.save()
-    return JsonResponse({"status": "success", "message": "Tweet retweeted successfully"}, status=status.HTTP_201_CREATED)
 
 @csrf_exempt
 @api_view(['POST'])
