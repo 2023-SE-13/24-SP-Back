@@ -11,6 +11,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from CompanyManagement.models import CompanyMember
+from NotificationCenter.models import Notification
+from NotificationCenter.views.utils.notifications import create_notification
+from PositionManagement.models import Position, Application, Offer
 from NotificationCenter.views.utils.notifications import create_notification
 from PositionManagement.models import Position, Application
 from PositionManagement.serializer import PositionSerializer
@@ -189,3 +192,102 @@ def get_position_applications(request):
             'applied_at': application.applied_at,
         })
     return JsonResponse(result, status=status.HTTP_200_OK, safe=False)
+
+
+@csrf_exempt
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def create_offer(request):
+    data = json.loads(request.body.decode('utf-8'))
+    cur_user = request.user
+    application = Application.objects.filter(application_id=data.get('application_id')).first()
+    if application is None:
+        return JsonResponse({"status": "error", "message": "Application does not exist"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    position = application.position
+    company = position.company
+    cm = CompanyMember.objects.filter(user=cur_user, company=company).first()
+    if cm is None or cm.role == 'Staff':
+        return JsonResponse({"status": "error", "message": "You are not allowed to create offer"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    if Offer.objects.filter(application=application).exists():
+        return JsonResponse({"status": "error", "message": "Offer already exists"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    offer = Offer(application=application, company=company, receiver=application.user, position=position)
+    tz = pytz.timezone('Asia/Shanghai')
+    utc8time = timezone.now().astimezone(tz)
+    offer.offer_at = utc8time
+    offer.save()
+    application.offer = offer
+    create_notification({
+        "username": application.user.username,
+        "notification_type": "system",
+        "content": f"You have received an offer from {company.company_name} for {position.position_name}",
+    })
+    return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
+
+@csrf_exempt
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_offer(request):
+    cur_user = request.user
+    offer = Offer.objects.filter(offer_id=request.GET.get('offer_id')).first()
+    if offer is None or offer.receiver != cur_user:
+        return JsonResponse({"status": "error", "message": "Offer does not exist"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    return JsonResponse({
+        'offer_id': offer.offer_id,
+        'company_id': offer.company.company_id,
+        'company_name': offer.company.company_name,
+        'position_id': offer.position.position_id,
+        'position_name': offer.position.position_name,
+        'offer_at': offer.offer_at,
+        'is_accepted': offer.is_accepted,
+    }, status=status.HTTP_200_OK)
+
+@csrf_exempt
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_offer_list(request):
+    cur_user = request.user
+    offers = Offer.objects.filter(receiver=cur_user)
+    result = []
+    for offer in offers:
+        result.append({
+            'offer_id': offer.offer_id,
+            'company': offer.company.company_name,
+            'position': offer.position.position_name,
+            'offer_at': offer.offer_at,
+            'is_accepted': offer.is_accepted,
+        })
+    return JsonResponse(result, status=status.HTTP_200_OK, safe=False)
+
+@csrf_exempt
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def update_offer(request):
+    data = json.loads(request.body.decode('utf-8'))
+    cur_user = request.user
+    state = data.get('state')
+    if state == 'accept':
+        offer = Offer.objects.filter(offer_id=data.get('offer_id')).first()
+        if offer is None or offer.receiver != cur_user:
+            return JsonResponse({"status": "error", "message": "Offer does not exist"},
+                                status=status.HTTP_400_BAD_REQUEST)
+        offer.is_accepted = True
+        Application.objects.filter(application_id=offer.application.application_id).update(result='Offer Accepted')
+        offer.save()
+        return JsonResponse({'status': 'success', "message": "Offer Accepted"}, status=status.HTTP_200_OK)
+    else:
+        offer = Offer.objects.filter(offer_id=data.get('offer_id')).first()
+        if offer is None or offer.receiver != cur_user:
+            return JsonResponse({"status": "error", "message": "Offer does not exist"},
+                                status=status.HTTP_400_BAD_REQUEST)
+        offer.is_accepted = False
+        Application.objects.filter(application_id=offer.application.application_id).update(result='Offer Rejected')
+        offer.save()
+        return JsonResponse({'status': 'success', "message": "Offer Rejected"}, status=status.HTTP_200_OK)
