@@ -40,13 +40,13 @@ def recommend_subscribe(request):
             "company_name": company.company_name,
         })
     if len(related_users) < 5:
-        hotest_users = User.objects.filter().order_by('-user_subscription')[:5-related_users.count()]
+        hotest_users = User.objects.filter().order_by('-user_subscription')[:5-len(related_users)]
         for hotest_user in hotest_users:
             recommends['users'].append({
                 "username": hotest_user.username,
             })
     if len(related_companies) < 5:
-        hotest_companies = Company.objects.filter().order_by('-company_subscription')[:5-related_companies.count()]
+        hotest_companies = Company.objects.filter().order_by('-company_subscription')[:5-len(related_companies)]
         for hotest_company in hotest_companies:
             recommends['companies'].append({
                 "company_name": hotest_company.company_name,
