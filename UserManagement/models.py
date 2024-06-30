@@ -14,12 +14,23 @@ class Skill(models.Model):
     def __str__(self):
         return self.name
 
+class PositionTag(models.Model):
+    category = models.CharField(max_length=255)
+    specialization = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = 'PositionTags'
+        unique_together = ('category', 'specialization')
+
+    def __str__(self):
+        return f"{self.category} - {self.specialization}"
+
 
 class User(AbstractUser):
     username = models.CharField(max_length=30, unique=True, primary_key=True)
     real_name = models.CharField(max_length=255)
     education = models.CharField(max_length=255, null=True)
-    desired_position = models.ManyToManyField('PositionManagement.PositionTag', blank=True)
+    desired_position = models.ManyToManyField(PositionTag, blank=True)
     blog_link = models.CharField(max_length=255, null=True)
     repository_link = models.CharField(max_length=255, null=True)
     user_subscription = models.IntegerField(default=0)

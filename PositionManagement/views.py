@@ -11,9 +11,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from CompanyManagement.models import CompanyMember
-from PositionManagement.models import Position, Application, PositionTag
+from PositionManagement.models import Position, Application
 from PositionManagement.serializer import PositionSerializer
-from UserManagement.models import User, Skill
+from UserManagement.models import User, Skill, PositionTag
 from shared.decorators import require_position, require_company
 
 

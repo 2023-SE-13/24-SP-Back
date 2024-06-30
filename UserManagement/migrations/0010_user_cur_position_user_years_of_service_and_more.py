@@ -21,10 +21,6 @@ class Migration(migrations.Migration):
             name='years_of_service',
             field=models.IntegerField(blank=True, null=True),
         ),
-        migrations.RemoveField(
-            model_name='user',
-            name='desired_position',
-        ),
         migrations.AddField(
             model_name='user',
             name='desired_position',
