@@ -299,7 +299,7 @@ def transfer_admin(request):
         if company_member.role == 'Staff':
             # 完美符合，可以转让
             CompanyMember.objects.get(company=company, user=admin_user).update(role='Staff')
-            company_member.update(role='Admin')
+            company_member.update(role='Creator')
             return JsonResponse({"status": "success"}, status=status.HTTP_200_OK)
         else:
             return JsonResponse({"status": "error", "message": "Target user's is not a staff"},
