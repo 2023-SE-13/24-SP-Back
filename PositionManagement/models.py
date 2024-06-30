@@ -1,8 +1,7 @@
 import uuid
-
+import pytz
 from django.db import models
-
-# Create your models here.
+from django.utils import timezone
 from CompanyManagement.models import Company
 from UserManagement.models import User
 
@@ -30,6 +29,7 @@ class Position(models.Model):
     posted_at = models.DateTimeField(null=True, blank=True)
     skill_required = models.ManyToManyField('UserManagement.Skill', blank=True)
     position_tag = models.ForeignKey(PositionTag, on_delete=models.CASCADE, null=True, blank=True)
+    hr = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)  # 关联 HR 用户
  
     class Meta:
         db_table = 'Positions'
