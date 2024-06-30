@@ -3,6 +3,7 @@ import uuid
 from django.utils import timezone
 
 from NotificationCenter.models import Notification
+from PositionManagement.models import Position
 from TweetManagement.models import Tweet
 from UserManagement.models import User, Message
 
@@ -17,16 +18,28 @@ def create_notification(json_str):
         content = data.get('content')
         notification = None
         if notification_type == "subscribe":
-            tweet_id = data.get('tweet_id')
-            tweet = Tweet.objects.get(tweet_id=tweet_id)
-            notification = Notification.objects.create(
-                notification_id=notification_id,
-                user=user,
-                notification_type=notification_type,
-                content=content,
-                tweet=tweet,
-                created_at=timezone.now()
-            )
+            tweet_id = data.get('tweet_id', None)
+            if tweet_id:
+                tweet = Tweet.objects.get(tweet_id=tweet_id)
+                notification = Notification.objects.create(
+                    notification_id=notification_id,
+                    user=user,
+                    notification_type=notification_type,
+                    content=content,
+                    tweet=tweet,
+                    created_at=timezone.now()
+                )
+            position_id = data.get('position_id', None)
+            if position_id:
+                position = Position.objects.get(position_id=position_id)
+                notification = Notification.objects.create(
+                    notification_id=notification_id,
+                    user=user,
+                    notification_type=notification_type,
+                    content=content,
+                    position=position,
+                    created_at=timezone.now()
+                )
         elif notification_type == "message":
             message_id = data.get('message_id')
             message = Message.objects.get(message_id=message_id)

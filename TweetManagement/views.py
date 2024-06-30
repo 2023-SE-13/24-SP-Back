@@ -208,10 +208,17 @@ def get_tweet_comment(request):
 
 @csrf_exempt
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
 @require_tweet
 def get_tweet(request):
     tweet = request.tweet_object
-    return JsonResponse({"status": "success", "data": TweetSerializer(tweet).data},  status=status.HTTP_200_OK)
+    data = TweetSerializer(tweet).data
+    if Likes.objects.filter(tweet=tweet, user=request.user).exists():
+        data["is_like"] = True
+    else:
+        data["is_like"] = False
+    return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
 
 @csrf_exempt
 @api_view(['GET'])
