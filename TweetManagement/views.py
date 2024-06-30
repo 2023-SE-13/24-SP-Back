@@ -28,6 +28,7 @@ class TweetCURDViewSet(viewsets.ModelViewSet):
     queryset = Tweet.objects.all()
     serializer_class = TweetSerializer
 
+
 @csrf_exempt
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -78,7 +79,8 @@ def create_tweet(request):
                 "tweet_id": str(tweet.tweet_id)
             }))
 
-    return JsonResponse({"status": "success", "message": "Tweet created successfully", "tweet_id": tweet.tweet_id}, status=status.HTTP_201_CREATED)
+    return JsonResponse({"status": "success", "message": "Tweet created successfully", "tweet_id": tweet.tweet_id},
+                        status=status.HTTP_201_CREATED)
 
 
 @csrf_exempt
@@ -98,7 +100,9 @@ def switch_tweetlike(request):
         Likes.objects.create(tweet=tweet, user=user)
         tweet.likes += 1
         tweet.save()
-    return JsonResponse({"status": "success", "message": "Tweet like status switched successfully"}, status=status.HTTP_200_OK)
+    return JsonResponse({"status": "success", "message": "Tweet like status switched successfully"},
+                        status=status.HTTP_200_OK)
+
 
 @csrf_exempt
 @api_view(['POST'])
@@ -128,7 +132,9 @@ def comment_tweet(request):
     Comment.objects.create(tweet=tweet, sender=user, content=content)
     tweet.comments += 1
     tweet.save()
-    return JsonResponse({"status": "success", "message": "Tweet commented successfully"}, status=status.HTTP_201_CREATED)
+    return JsonResponse({"status": "success", "message": "Tweet commented successfully"},
+                        status=status.HTTP_201_CREATED)
+
 
 @csrf_exempt
 @api_view(['POST'])
@@ -164,10 +170,12 @@ def comment_user(request):
     target_user = request.user_object
     content = request.text_content
     content = "回复 @" + target_user.username + " ：" + content
-    Comment.objects.create(target_user=target_user, target_comment=target_comment, sender=user, content=content, tweet=tweet)
+    Comment.objects.create(target_user=target_user, target_comment=target_comment, sender=user, content=content,
+                           tweet=tweet)
     tweet.comments += 1
     tweet.save()
     return JsonResponse({"status": "success", "message": "User commented successfully"}, status=status.HTTP_201_CREATED)
+
 
 @csrf_exempt
 @api_view(['GET'])
@@ -181,9 +189,10 @@ def get_company_tweet(request):
         data.append(
             company_tweet.tweet_id
         )
-    return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
+    return JsonResponse({"status": "success", "data": data}, status=status.HTTP_200_OK)
 
-@csrf_exempt	
+
+@csrf_exempt
 @api_view(['GET'])
 @require_tweet
 def get_tweet_comment(request):
@@ -201,7 +210,9 @@ def get_tweet_comment(request):
                 "children_list": children_comment_id,
             }
         )
-    return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
+    return JsonResponse({"status": "success", "data": data}, status=status.HTTP_200_OK)
+
+
 # TODO
 
 @csrf_exempt
@@ -217,6 +228,7 @@ def get_tweet(request):
     else:
         data["is_like"] = False
     return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
+
 
 @csrf_exempt
 @api_view(['GET'])
@@ -239,8 +251,8 @@ def get_comment(request):
             "createTime": child.created_at.strftime('%Y-%m-%d %H:%M:%S'),
         }
         data["children_comment"].append(child_data)
-    
-    return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
+
+    return JsonResponse({"status": "success", "data": data}, status=status.HTTP_200_OK)
 
 
 @csrf_exempt
@@ -254,4 +266,4 @@ def get_user_tweet(request):
         data.append(
             user_tweet.tweet_id
         )
-    return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
+    return JsonResponse({"status": "success", "data": data}, status=status.HTTP_200_OK)
