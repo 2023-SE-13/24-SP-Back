@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from CompanyManagement.models import CompanyMember
-from PositionManagement.models import Position, Application
+from PositionManagement.models import Position, Application, PositionTag
 from PositionManagement.serializer import PositionSerializer
 from UserManagement.models import User, Skill
 from shared.decorators import require_position, require_company
@@ -39,13 +39,15 @@ def create_position(request):
     salary_min = data.get('salary_min')
     salary_max = data.get('salary_max')
     skill_required = data.get('skill_required')
+    position_tag = PositionTag.objects.filter(category=data.get('position_tag').get('category'),
+                                              specialization=data.get('position_tag').get('specialization')).first()
     if not position_name or not position_description:
         return JsonResponse(
             {"status": "error", "message": "position_name, position_description are required"},
             status=status.HTTP_406_NOT_ACCEPTABLE)
     position = Position(company=company, position_name=position_name, position_description=position_description,
                         location=location, education_requirement=education_requirement, salary_min=salary_min,
-                        salary_max=salary_max, hr=cur_user)
+                        salary_max=salary_max, hr=cur_user, position_tag=position_tag)
     position.save()
     for skill in skill_required:
         position.skill_required.add(Skill.objects.get(name=skill))

@@ -17,6 +17,13 @@ class PositionSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         representation['company_id'] = representation.pop('company')
         representation['skill_required'] = skill_names
+        if instance.position_tag:
+            representation['position_tag'] = {
+                'category': instance.position_tag.category,
+                'specialization': instance.position_tag.specialization
+            }
+        else:
+            representation['position_tag'] = None
         return representation
 
     def get_application_count(self, obj):
