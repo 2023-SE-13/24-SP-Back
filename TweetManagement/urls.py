@@ -21,4 +21,5 @@ urlpatterns = [
 	path('get_tweet_comment', get_tweet_comment),
     path('get_tweet', get_tweet),
     path('get_comment', get_comment),
+    path('get_user_tweet', get_user_tweet),
 ]
