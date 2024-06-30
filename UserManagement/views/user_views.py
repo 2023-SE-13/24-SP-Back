@@ -18,7 +18,6 @@ import json
 from CompanyManagement.models import CompanyMember
 from UserManagement.serializers import UserSerializer
 from UserManagement.models import User, VerificationCode, Skill
-from PositionManagement.models import PositionTag
 from shared.decorators import require_user
 from shared.utils.UserManage.users import get_user_by_username, get_user_by_email
 from shared.utils.email import send_email
