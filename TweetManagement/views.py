@@ -167,8 +167,8 @@ def get_company_tweet(request):
     data = []
     for company_tweet in company_tweets:
         data.append(
-			company_tweet.tweet_id
-		)
+            company_tweet.tweet_id
+        )
     return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
 
 @csrf_exempt	
@@ -181,14 +181,14 @@ def get_tweet_comment(request):
     for comment in comments:
         children_comment_id = list(Comment.objects.filter(target_comment=comment).values_list('comment_id', flat=True))
         data.append(
-			{
-				"comment_id": comment.comment_id,
-				"comment_sender": comment.sender.username,
-				"content": comment.content,
-				"createTime": comment.created_at,
-				"children_list": children_comment_id,
-			}
-		)
+            {
+                "comment_id": comment.comment_id,
+                "comment_sender": comment.sender.username,
+                "content": comment.content,
+                "createTime": comment.created_at,
+                "children_list": children_comment_id,
+            }
+        )
     return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
 # TODO
 
@@ -204,10 +204,21 @@ def get_tweet(request):
 @require_comment
 def get_comment(request):
     comment = request.comment_object
-    return JsonResponse({"status": "success", "data": {
+    data = {
         "comment_id": comment.comment_id,
         "sender": comment.sender.username,
         "content": comment.content,
         "createTime": comment.created_at.strftime('%Y-%m-%d %H:%M:%S'),
-        "children_comment": list(Comment.objects.filter(target_comment=comment).values_list('comment_id', flat=True))
-    }},  status=status.HTTP_200_OK)
+        "children_comment": [],
+    }
+    children_comment = Comment.objects.filter(target_comment=comment)
+    for child in children_comment:
+        child_data = {
+            "comment_id": child.comment_id,
+            "sender": child.sender.username,
+            "content": child.content,
+            "createTime": child.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        }
+        data["children_comment"].append(child_data)
+    
+    return JsonResponse({"status": "success", "data": data},  status=status.HTTP_200_OK)
