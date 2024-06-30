@@ -173,7 +173,8 @@ def update_user(request):
     # 在这里进行实际的更新操作
     try:
         fields_to_update = ['password', 'real_name', 'email', 'education', 'blog_link',
-                            'repository_link', 'desired_work_city', 'salary_min', 'salary_max']
+                            'repository_link', 'desired_work_city', 'salary_min', 'salary_max',
+                            'years_of_service', 'cur_position', 'school', 'age']
 
         for field in fields_to_update:
             if data.get(field) is not None and getattr(current_user, field) != data.get(field):
