@@ -87,6 +87,14 @@ def register(request):
     new_user = User(password=hashed_password, username=username, real_name=real_name, email=email)
     new_user.save()
 
+    default_avatar_path = 'resources/avatars/default_avatar.png'
+    with open(default_avatar_path, 'rb') as f:
+        avatar_content = f.read()
+    new_filename = f"{username}_avatar.png"
+    new_file = ContentFile(avatar_content)
+    new_file.name = new_filename
+    new_user.avatar.save(new_filename, new_file, save=True)
+
     return JsonResponse({"status": "success", "message": "User successfully registered"},
                         status=status.HTTP_200_OK)
 
@@ -257,3 +265,32 @@ def upload_resume(request):
                             status=status.HTTP_400_BAD_REQUEST)
     return JsonResponse({"status": "success", "message": "Resume uploaded successfully"}, status=status.HTTP_200_OK)
 
+
+@csrf_exempt
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def set_avatar(request):
+    try:
+        # 从请求中获取文件
+        avatar = request.FILES.get('avatar', None)
+        if not avatar:
+            return JsonResponse({"status": "error", "message": "No avatar file provided"},
+                                status=status.HTTP_400_BAD_REQUEST)
+        # 获取用户
+        user = User.objects.get(username=request.user.username)
+        # 删除旧的头像文件，如果存在的话
+        if user.avatar:
+            with Lock(user.avatar.path, 'r+b'):
+                user.avatar.delete(save=False)
+        # 创建新的头像文件名
+        new_filename = f"{user.username}_avatar.png"
+        # 读取和保存新文件
+        new_file = ContentFile(avatar.read())
+        new_file.name = new_filename
+        # 保存新的头像
+        user.avatar.save(new_filename, new_file, save=True)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": f"An error occurred: {str(e)}"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    return JsonResponse({"status": "success", "message": "Avatar updated successfully"}, status=status.HTTP_200_OK)
