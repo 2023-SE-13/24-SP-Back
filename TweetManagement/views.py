@@ -63,7 +63,7 @@ def create_tweet(request):
     for subscriber in user_subscribers:
         create_notification(json.dumps({
             "username": subscriber.user_src.username,
-            "notification_type": "tweet",
+            "notification_type": "subscribe",
             "content": f"User {user.username} has created a new tweet",
             "tweet_id": str(tweet.tweet_id)
         }))
@@ -75,7 +75,7 @@ def create_tweet(request):
         for subscriber in company_subscriber:
             create_notification(json.dumps({
                 "username": subscriber.user.username,
-                "notification_type": "tweet",
+                "notification_type": "subscribe",
                 "content": f"Company {subscriber.company.company_name} has created a new tweet",
                 "tweet_id": str(tweet.tweet_id)
             }))
