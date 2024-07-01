@@ -22,5 +22,6 @@ urlpatterns = [
     path('is_staff', is_staff),
     path('is_to_join', is_to_join),
     path('add_staff', add_company_member),
-    path('update_company', update_company)
+    path('update_company', update_company),
+    path('transfer_admin', transfer_admin),
 ]
