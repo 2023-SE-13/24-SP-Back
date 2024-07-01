@@ -21,8 +21,6 @@ from UserManagement.models import User, VerificationCode, Skill, PositionTag
 from shared.decorators import require_user
 from shared.utils.UserManage.users import get_user_by_username, get_user_by_email
 from shared.utils.email import send_email
-import shutil
-import os
 
 from shared.utils.UserManage.users import get_user_by_email
 

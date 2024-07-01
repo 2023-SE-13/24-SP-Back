@@ -7,6 +7,7 @@ from rest_framework import status, viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import IsAuthenticated
+from portalocker import Lock
 
 from CompanyManagement.serializer import CompanySerializer, CompanyMemberUserSerializer
 from UserManagement.models import User
@@ -90,6 +91,31 @@ def update_company(request):
         if field in data:
             setattr(company, field, data[field])
     company.save()
+    return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
+
+@api_view(['PUT'])
+@csrf_exempt
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def update_logo(request):
+    cur_user = request.user
+    cm = CompanyMember.objects.filter(user=cur_user).first()
+    if cm is None or cm.role == 'Staff':
+        return JsonResponse({"status": "error", "message": "You are not allowed to update company logo"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    company = cm.company
+    logo = request.FILES.get('logo')
+    if logo is None:
+        return JsonResponse({"status": "error", "message": "company_image is required"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    if company.company_image:
+        with Lock(company.company_image.path, 'r+b'):
+            company.company_image.delete(save=False)
+    new_filename = f"{company.company_id}_image.png"
+    new_file = ContentFile(logo.read())
+    new_file.name = new_filename
+    company.company_image.save(new_filename, new_file, save=True)
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 
 
@@ -311,3 +337,5 @@ def transfer_admin(request):
     else:
         return JsonResponse({"status": "error", "message": "Target user is not a member of this company"},
                             status=status.HTTP_404_NOT_FOUND)
+
+
