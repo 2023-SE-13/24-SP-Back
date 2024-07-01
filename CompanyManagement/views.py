@@ -294,12 +294,15 @@ def transfer_admin(request):
     company = request.company_object
     admin_user = request.user
     user_to_transfer = request.user_object
-    company_member = CompanyMember.objects.get(company=company, user=user_to_transfer)
-    if company_member.exists():
+    company_member = CompanyMember.objects.filter(company=company, user=user_to_transfer).first()
+    if company_member:
         if company_member.role == 'Staff':
             # 完美符合，可以转让
-            CompanyMember.objects.get(company=company, user=admin_user).update(role='Staff')
-            company_member.update(role='Admin')
+            to_transfer = CompanyMember.objects.get(company=company, user=admin_user)
+            to_transfer.role = 'Staff'
+            to_transfer.save()
+            company_member.role = 'Admin'
+            company_member.save()
             return JsonResponse({"status": "success"}, status=status.HTTP_200_OK)
         else:
             return JsonResponse({"status": "error", "message": "Target user's is not a staff"},

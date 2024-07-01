@@ -1,10 +1,11 @@
 import os
-from django.db.models import Count
+from django.db.models import Count, QuerySet
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 
 from CompanyManagement.models import Company, CompanyMember
@@ -16,21 +17,55 @@ from shared.decorators import require_position
 # Create your views here.
 @csrf_exempt
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 def recommend_subscribe(request):
-    user = User.objects.get(username =request.user.username)
+    if not request.user.is_authenticated:
+        guest_recommends = {
+            "users": [],
+            "companies": []
+        }
+        guest_hotest_users = User.objects.filter().order_by('-user_subscription')[:6]
+        for guest_hotest_user in guest_hotest_users:
+            guest_company_member = CompanyMember.objects.filter(user=guest_hotest_user).first()
+            guest_company_name = ""
+            if guest_company_member:
+                guest_company_name = guest_company_member.company.company_name
+            guest_recommends['users'].append({
+                "username": guest_hotest_user.username,
+                "avatar": os.path.basename(guest_hotest_user.avatar.name) if guest_hotest_user.avatar.name else "",
+                "company_name": guest_company_name,
+            })
+        guest_hotest_companies = Company.objects.filter().order_by('-company_subscription')[:6]
+        for guest_hotest_company in guest_hotest_companies:
+            guest_recommends['companies'].append({
+                "company_id": guest_hotest_company.company_id,
+                "company_name": guest_hotest_company.company_name,
+                "company_image": os.path.basename(
+                    guest_hotest_company.company_image.name) if guest_hotest_company.company_image.name else "",
+            })
+        return JsonResponse({"status": "success", "data": guest_recommends}, status=200)
+    # 用户已登录
+    user = User.objects.get(username=request.user.username)
     desired_position = user.desired_position.all()
     positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
     user_skills = user.skills.all()
     related_users = User.objects.filter(skills__in=user_skills).exclude(username=user.username).annotate(num_common_skills=Count('skills')).filter(num_common_skills__gt=0).order_by('-num_common_skills')
-    related_companies = []
+    related_companies = QuerySet(Company)
     for position in positions:  
-        related_companies.append(position.company)
+        related_companies += position.company
     recommends = {
         "users": [],
         "companies": []
     }
+    if len(related_users) < 6:
+        hotest_users = User.objects.filter().order_by('-user_subscription')[:6]
+        related_users += hotest_users
+        related_users.distinct()
+    if len(related_companies) < 6:
+        hotest_companies = Company.objects.filter().order_by('-company_subscription')[:6]
+        related_companies += hotest_companies
+        related_companies.distinct()
+
     for related_user in related_users:
         company_member = CompanyMember.objects.filter(user=related_user).first()
         company_name = ""
@@ -47,46 +82,34 @@ def recommend_subscribe(request):
             "company_name": os.path.basename(related_company.company_name) if related_company.company_name else "",
             "company_image": related_company.company_image.name,
         })
-    if len(related_users) < 5:
-        hotest_users = User.objects.filter().order_by('-user_subscription')[:5-len(related_users)]
-        for hotest_user in hotest_users:
-            company_member = CompanyMember.objects.filter(user=hotest_user).first()
-            company_name = ""
-            if company_member:
-                company_name = company_member.company.company_name
-            recommends['users'].append({
-                "username": hotest_user.username,
-                "avatar": os.path.basename(hotest_user.avatar.name) if hotest_user.avatar.name else "",
-                "company_name": company_name,
-            })
-    if len(related_companies) < 5:
-        hotest_companies = Company.objects.filter().order_by('-company_subscription')[:5-len(related_companies)]
-        for hotest_company in hotest_companies:
-            recommends['companies'].append({
-                "company_id": hotest_company.company_id,
-                "company_name": hotest_company.company_name,
-                "company_image": os.path.basename(hotest_company.company_image.name) if hotest_company.company_image.name else "",
-            })
+
+
     return JsonResponse({"status": "success", "data": recommends}, status=200)
 
 @csrf_exempt
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 def recommend_position(request):
-    user = User.objects.get(username =request.user.username)
-    recommends = []
-    desired_position = user.desired_position.all()
-    if desired_position:
-        related_positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
+    if request.user.is_authenticated:
+        user = User.objects.get(username =request.user.username)
+        recommends = []
+        desired_position = user.desired_position.all()
+        if desired_position:
+            related_positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
 
-        for related_position in related_positions:
-            recommends.append(PositionSerializer(related_position).data)
+            for related_position in related_positions:
+                recommends.append(PositionSerializer(related_position).data)
+        else:
+            latest_positions = Position.objects.filter().order_by('-posted_at')[:6]
+            for latest_position in latest_positions:
+                recommends.append(PositionSerializer(latest_position).data)
+        return JsonResponse({"status": "success", "data": recommends}, status=200)
     else:
-        latest_positions = Position.objects.filter().order_by('-posted_at')[:9]
+        latest_positions = Position.objects.filter().order_by('-posted_at')[:6]
+        recommends = []
         for latest_position in latest_positions:
             recommends.append(PositionSerializer(latest_position).data)
-    return JsonResponse({"status": "success", "data": recommends}, status=200)
+        return JsonResponse({"status": "success", "data": recommends}, status=200)
 
 
 @csrf_exempt
