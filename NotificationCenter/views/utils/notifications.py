@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from CompanyManagement.models import Company
 from NotificationCenter.models import Notification
-from PositionManagement.models import Position
+from PositionManagement.models import Position, Offer
 from TweetManagement.models import Tweet
 from UserManagement.models import User, Message
 
@@ -53,10 +53,12 @@ def create_notification(json_str):
                 created_at=timezone.now()
             )
         elif notification_type == "system":
-            company_id = data.get('company_id')
-            company = Company.objects.get(company_id=company_id)
-            position_id = data.get('position_id')
-            position = Position.objects.get(position_id=position_id)
+            company_id = data.get('company_id', None)
+            company = Company.objects.filter(company_id=company_id).first()
+            position_id = data.get('position_id', None)
+            position = Position.objects.filter(position_id=position_id).first()
+            offer_id =  data.get('offer_id', None)
+            offer = Offer.objects.filter(offer_id=offer_id).first()
             notification = Notification.objects.create(
                 notification_id=notification_id,
                 user=user,
@@ -64,6 +66,7 @@ def create_notification(json_str):
                 content=content,
                 company=company,
                 position=position,
+                offer=offer,
                 created_at=timezone.now()
             )
 

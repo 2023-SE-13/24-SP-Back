@@ -82,10 +82,11 @@ def get_user_notifications(request):
             "is_read": notification.is_read,
             "created_at": notification.created_at.strftime('%Y-%m-%d'),
             "content": notification.content,
-            "company_name": notification.company.company_name if notification.company else None,
+            "company_name": notification.company.company_name if notification.company else "",
             "username": notification.user.username,
             'realname': notification.user.real_name,
-            "position_name": notification.position.position_name if notification.position else None,
+            "position_name": notification.position.position_name if notification.position else "",
+            "offer_id": notification.offer.offer_id if notification.offer else "",
         })
     return Response({"status": "success", "data": data}, status=status.HTTP_200_OK)
 

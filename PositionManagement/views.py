@@ -254,6 +254,7 @@ def create_offer(request):
         "content": f"【offer】 {company.company_name}",
         "company_id": str(company.company_id),
         "position_id": str(position.position_id),
+        "offer_id": str(offer.offer_id),
     }))
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 
