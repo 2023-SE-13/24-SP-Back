@@ -19,7 +19,7 @@ from shared.decorators import require_position
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 def recommend_subscribe(request):
-    if not request.user:
+    if request.user.username:
         guest_recommends = {
             "users": [],
             "companies": []
@@ -44,7 +44,7 @@ def recommend_subscribe(request):
                     guest_hotest_company.company_image.name) if guest_hotest_company.company_image.name else "",
             })
         return JsonResponse({"status": "success", "data": guest_recommends}, status=200)
-    user = User.objects.get(username =request.user.username)
+    user = User.objects.get(username=request.user.username)
     desired_position = user.desired_position.all()
     positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
     user_skills = user.skills.all()
