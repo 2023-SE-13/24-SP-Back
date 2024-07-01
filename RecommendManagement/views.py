@@ -19,7 +19,7 @@ from shared.decorators import require_position
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 def recommend_subscribe(request):
-    if request.user.username:
+    if not request.user.username:
         guest_recommends = {
             "users": [],
             "companies": []
