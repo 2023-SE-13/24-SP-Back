@@ -147,6 +147,18 @@ def add_company_member(request):
 
 
 @csrf_exempt
+@api_view(['GET'])
+def tempapi(request):
+    companies = Company.objects.filter()
+    default_logo_path = 'resources/company_images/default_image.png'
+    with open(default_logo_path, 'rb') as f:
+        default_logo = ContentFile(f.read())
+    for company in companies:
+        newfilename = f"{company.company_id}_image.png"
+        company.company_image.save(newfilename, default_logo, save=True)
+    return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
+
+@csrf_exempt
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])

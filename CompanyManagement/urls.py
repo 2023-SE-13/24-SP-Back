@@ -22,4 +22,5 @@ urlpatterns = [
     path('update_logo', update_logo),
     path('transfer_admin', transfer_admin),
     path('delete_staff', delete_staff),
+    path('tempapi', tempapi),
 ]
