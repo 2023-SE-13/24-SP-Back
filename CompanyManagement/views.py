@@ -291,10 +291,10 @@ def is_to_join(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def transfer_admin(request):
-    company = request.company_object
+    company = request.company_objects
     admin_user = request.user
     user_to_transfer = request.user_object
-    company_member = CompanyMember.objects.get(company=company, user=user_to_transfer)
+    company_member = CompanyMember.objects.filter(company=company, user=user_to_transfer)
     if company_member.exists():
         if company_member.role == 'Staff':
             # 完美符合，可以转让
