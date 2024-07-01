@@ -294,8 +294,8 @@ def transfer_admin(request):
     company = request.company_object
     admin_user = request.user
     user_to_transfer = request.user_object
-    company_member = CompanyMember.objects.filter(company=company, user=user_to_transfer)
-    if company_member.exists():
+    company_member = CompanyMember.objects.filter(company=company, user=user_to_transfer).first()
+    if company_member:
         if company_member.role == 'Staff':
             # 完美符合，可以转让
             CompanyMember.objects.get(company=company, user=admin_user).update(role='Staff')
