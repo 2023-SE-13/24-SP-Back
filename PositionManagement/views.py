@@ -156,6 +156,9 @@ def apply_position(request):
     if Application.objects.filter(user=cur_usr, position=position).exists():
         return JsonResponse({"status": "error", "message": "You have already applied for this position"},
                             status=status.HTTP_400_BAD_REQUEST)
+    if Offer.objects.filter(receiver=cur_usr, position=position).exists():
+        return JsonResponse({"status": "error", "message": "You have already received an offer for this position"},
+                            status=status.HTTP_400_BAD_REQUEST)
     if cur_usr.is_staff:
         return JsonResponse({"status": "error", "message": "Staff cannot apply for position"},
                             status=status.HTTP_400_BAD_REQUEST)
