@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 
 from CompanyManagement.models import Company, CompanyMember
@@ -19,6 +20,39 @@ from shared.decorators import require_position
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 def recommend_subscribe(request):
+    def initial(self, request, *args, **kwargs):
+        try:
+            super().initial(request, *args, **kwargs)
+        except AuthenticationFailed as e:
+            handle_authentication_failed(self,e)
+
+    def handle_authentication_failed(self, exception):
+        guest_recommends = {
+            "users": [],
+            "companies": []
+        }
+
+
+        guest_hotest_users = User.objects.filter().order_by('-user_subscription')[:5 - len(related_users)]
+        for guest_hotest_user in guest_hotest_users:
+            guest_company_member = CompanyMember.objects.filter(user=hotest_user).first()
+            guest_company_name = ""
+            if company_member:
+                guest_company_name = company_member.company.company_name
+            guest_recommends['users'].append({
+                "username": hotest_user.username,
+                "avatar": os.path.basename(hotest_user.avatar.name) if hotest_user.avatar.name else "",
+                "company_name": guest_company_name,
+            })
+        guest_hotest_companies = Company.objects.filter().order_by('-company_subscription')[:5 - len(related_companies)]
+        for guest_hotest_company in guest_hotest_companies:
+            guest_recommends['companies'].append({
+                "company_id": hotest_company.company_id,
+                "company_name": hotest_company.company_name,
+                "company_image": os.path.basename(
+                    hotest_company.company_image.name) if hotest_company.company_image.name else "",
+            })
+        return JsonResponse({"status": "success", "data": guest_recommends}, status=200)
     user = User.objects.get(username =request.user.username)
     desired_position = user.desired_position.all()
     positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
