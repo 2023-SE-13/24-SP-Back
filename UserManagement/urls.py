@@ -23,6 +23,7 @@ urlpatterns = [
     path('get_conversations', views.get_conversations),
     path('create_conversation', views.create_conversation),
     path('get_messages', views.get_messages),
+    path('get_conversation',views.get_conversation),
 
 
 ]
