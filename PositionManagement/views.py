@@ -346,6 +346,8 @@ def search_position(request):
             'position_id': position.position_id,
             'position_name': position.position_name,
             'company_name': position.company.company_name,
+            'salary_min': position.salary_min,
+            'salary_max': position.salary_max,
 
         })
     return JsonResponse({"status": "success", "data": data},
