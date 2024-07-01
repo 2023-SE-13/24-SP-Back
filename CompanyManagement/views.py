@@ -115,6 +115,7 @@ def add_company_member(request):
                             status=status.HTTP_400_BAD_REQUEST)
     # 添加用户到企业
     CompanyMember.objects.create(company=company, user=user_to_add)
+    user_to_add.is_staff = True
     return JsonResponse({'status': 'success', "message": "User successfully added to the company"},
                         status=status.HTTP_201_CREATED)
 
