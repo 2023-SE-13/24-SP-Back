@@ -60,29 +60,36 @@ def recommend_subscribe(request):
         "companies": []
     }
     if len(related_users) < 6:
-        hotest_users = User.objects.filter().annotate(num_common_skills=Count('skills')).order_by('-user_subscription').exclude(username=user.username)[:6]
+        hotest_users = User.objects.filter().annotate(num_common_skills=Count('skills')).order_by('-user_subscription').exclude(username=user.username)[:9]
         related_users = related_users.union(hotest_users)
         
     if len(related_companies) < 6:
-        hotest_companies = Company.objects.filter().order_by('-company_subscription')[:6]
+        hotest_companies = Company.objects.filter().order_by('-company_subscription')[:12]
         related_companies = related_companies.union(hotest_companies)
-    
+    i = 0
     for related_user in related_users:
-        company_member = CompanyMember.objects.filter(user=related_user).first()
-        company_name = ""
-        if company_member:
-            company_name = company_member.company.company_name
-        recommends['users'].append({
-            "username": related_user.username,
-            "avatar": os.path.basename(related_user.avatar.name) if related_user.avatar.name else "",
-            "company_name": company_name,
-        })
+        if i < 9:
+            i += 1
+            company_member = CompanyMember.objects.filter(user=related_user).first()
+            company_name = ""
+            if company_member:
+                company_name = company_member.company.company_name
+            recommends['users'].append({
+                "username": related_user.username,
+                "avatar": os.path.basename(related_user.avatar.name) if related_user.avatar.name else "",
+                "company_name": company_name,
+            })
+    i = 0
     for related_company in related_companies:
-        recommends['companies'].append({
-            "company_id": related_company.company_id,
-            "company_name": os.path.basename(related_company.company_name) if related_company.company_name else "",
-            "company_image": related_company.company_image.name,
-        })
+        if i < 12:
+            i += 1
+            recommends['companies'].append({
+                "company_id": related_company.company_id,
+                "company_name": os.path.basename(related_company.company_name) if related_company.company_name else "",
+                "company_image": related_company.company_image.name,
+            })
+
+
 
 
     return JsonResponse({"status": "success", "data": recommends}, status=200)
