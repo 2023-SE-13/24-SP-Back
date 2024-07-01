@@ -159,8 +159,8 @@ def apply_position(request):
     if Offer.objects.filter(receiver=cur_usr, position=position).exists():
         return JsonResponse({"status": "error", "message": "You have already received an offer for this position"},
                             status=status.HTTP_400_BAD_REQUEST)
-    if User.objects.get(username=cur_usr.username).resume is None:
-        return JsonResponse({"status": "error", "message": "Please upload your resume before applying for a position"},
+    if User.objects.get(username=cur_usr.username).resume is None or User.objects.get(username=cur_usr.username).resume == '':
+        return JsonResponse({"status": "miss", "message": "Please upload your resume before applying for a position"},
                             status=status.HTTP_400_BAD_REQUEST)
     tz = pytz.timezone('Asia/Shanghai')
     utc8time = timezone.now().astimezone(tz)
