@@ -63,36 +63,32 @@ def get_user_notifications(request):
     user = request.user
     require_type = request.GET.get('require_type')
     notifications = None
-    switcher = {
-        'ALL': Notification.objects.filter(user=user),
-        'subscribe': Notification.objects.filter(user=user, notification_type='subscribe'),
-        'system': Notification.objects.filter(user=user, notification_type='system'),
-    }
-    notifications = switcher.get(require_type, None)
+    if require_type == 'ALL':
+        notifications = Notification.objects.filter(user=user)
+
+    elif require_type == 'subscribe':
+        notifications = Notification.objects.filter(user=user, notification_type='subscribe')
+
+    elif require_type == 'system':
+        notifications = Notification.objects.filter(user=user, notification_type='system')
+
+    # serializer = NotificationSerializer(notifications, many=True)
     data = []
     for notification in notifications:
-        company = notification.company or {}
-        position = notification.position or {}
-        offer = notification.offer or {}
-        tweet = notification.tweet or {}
-
         data.append({
             "notification_id": notification.notification_id,
             "notification_type": notification.notification_type,
             "is_read": notification.is_read,
             "created_at": notification.created_at.strftime('%Y-%m-%d'),
             "content": notification.content,
-            "company_name": company.get('company_name', ""),
-            "company_id": company.get('company_id', ""),
+            "company_name": notification.company.company_name if notification.company else "",
+            "company_id": notification.company.company_id if notification.company else "",
             "username": notification.user.username,
             'realname': notification.user.real_name,
-            "position_name": position.get('position_name', ""),
-            "offer_id": offer.get('offer_id', ""),
-            "tweet_id": tweet.get('tweet_id', ""),
-            "position_id": position.get('position_id', ""),
+            "position_name": notification.position.position_name if notification.position else "",
+            "offer_id": notification.offer.offer_id if notification.offer else "",
         })
     return Response({"status": "success", "data": data}, status=status.HTTP_200_OK)
-
 
 @csrf_exempt
 @api_view(['PUT'])
