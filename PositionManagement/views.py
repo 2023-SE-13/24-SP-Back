@@ -238,6 +238,7 @@ def create_offer(request):
     cm = CompanyMember.objects.filter(user=cur_user, company=company).first()
     if cm is None or cm.role == 'Staff':
         return JsonResponse({"status": "error", "message": "You are not allowed to create offer"},
+                            status=status.HTTP_400_BAD_REQUEST)
     offer = Offer(company=company, receiver=application.user, position=position)
     tz = pytz.timezone('Asia/Shanghai')
     utc8time = timezone.now().astimezone(tz)
