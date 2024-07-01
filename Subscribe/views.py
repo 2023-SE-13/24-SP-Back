@@ -1,8 +1,12 @@
+import os
+
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework import status
 import json
+
+from CompanyManagement.models import CompanyMember
 from shared.decorators import require_user, require_company
 from .serializers import SubscribeCompanySerializer
 from .serializers import SubscribeUserSerializer
@@ -133,3 +137,37 @@ def do_subscribed_user(request):
         else:
             return Response({"status": "fail"}, status=status.HTTP_201_CREATED)
     return Response({'status': 'Method Not Allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+@api_view(['GET'])
+@csrf_exempt
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_subscribe_user(request):
+    user = request.user
+    subscribe_users = SubscribeUser.objects.filter(user_src=user)
+    data = []
+    for subscribe_user in subscribe_users:
+        data.append({
+            "username": subscribe_user.user_dst.username,
+            "avatar": os.path.basename(subscribe_user.user_dst.avatar.name),
+            "company_name": CompanyMember.objects.get(user=subscribe_user).company.company_name if CompanyMember.objects.filter(user=subscribe_user).exists() else "",
+        })
+    return Response({"status": "success", "data": data}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@csrf_exempt
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_subscribe_company(request):
+    user = request.user
+    subscribe_companies = SubscribeCompany.objects.filter(user=user)
+    data = []
+    for subscribe_company in subscribe_companies:
+        data.append({
+            "company_id": subscribe_company.company.company_id,
+            "company_name": subscribe_company.company.company_name,
+            "company_image": os.path.basename(subscribe_company.company.company_image.name),
+            "company_description": subscribe_company.company.company_description,
+        })
+    return Response({"status": "success", "data": data}, status=status.HTTP_200_OK)
+

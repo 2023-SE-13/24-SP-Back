@@ -63,7 +63,8 @@ def create_tweet(request):
         create_notification(json.dumps({
             "username": subscriber.user_src.username,
             "notification_type": "subscribe",
-            "content": f"User {user.username} has created a new tweet",
+            "content": f"【新动态】 {user.username}",
+
             "tweet_id": str(tweet.tweet_id)
         }))
 
@@ -75,7 +76,7 @@ def create_tweet(request):
             create_notification(json.dumps({
                 "username": subscriber.user.username,
                 "notification_type": "subscribe",
-                "content": f"Company {subscriber.company.company_name} has created a new tweet",
+                "content": f"【新动态】 {subscriber.company.company_name}",
                 "tweet_id": str(tweet.tweet_id)
             }))
 
