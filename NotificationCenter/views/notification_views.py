@@ -80,7 +80,7 @@ def get_user_notifications(request):
             "notification_id": notification.notification_id,
             "notification_type": notification.notification_type,
             "is_read": notification.is_read,
-            "created_at": notification.created_at,
+            "created_at": notification.created_at.strftime('%Y-%m-%d'),
             "content": notification.content,
             "company_name": notification.company.company_name if notification.company else None,
             "username": notification.user.username,
