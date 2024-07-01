@@ -140,10 +140,9 @@ def do_subscribed_user(request):
 
 @api_view(['GET'])
 @csrf_exempt
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
+@require_user
 def get_subscribe_user(request):
-    user = request.user
+    user = request.user_object
     subscribe_users = SubscribeUser.objects.filter(user_src=user)
     data = []
     for subscribe_user in subscribe_users:
@@ -156,10 +155,9 @@ def get_subscribe_user(request):
 
 @api_view(['GET'])
 @csrf_exempt
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
+@require_user
 def get_subscribe_company(request):
-    user = request.user
+    user = request.user_object
     subscribe_companies = SubscribeCompany.objects.filter(user=user)
     data = []
     for subscribe_company in subscribe_companies:
