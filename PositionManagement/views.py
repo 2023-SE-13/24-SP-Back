@@ -159,9 +159,6 @@ def apply_position(request):
     if Offer.objects.filter(receiver=cur_usr, position=position).exists():
         return JsonResponse({"status": "error", "message": "You have already received an offer for this position"},
                             status=status.HTTP_400_BAD_REQUEST)
-    if cur_usr.is_staff:
-        return JsonResponse({"status": "error", "message": "Staff cannot apply for position"},
-                            status=status.HTTP_400_BAD_REQUEST)
     if User.objects.get(username=cur_usr.username).resume is None:
         return JsonResponse({"status": "error", "message": "Please upload your resume before applying for a position"},
                             status=status.HTTP_400_BAD_REQUEST)
@@ -312,6 +309,11 @@ def update_offer(request):
         return JsonResponse({"status": "error", "message": "Offer has been processed"},
                             status=status.HTTP_400_BAD_REQUEST)
     if state == 'accept':
+        if cur_user.is_staff:
+            return JsonResponse({"status": "error",
+                                 "message": "You are already a staff. Please quit your current company first"},
+                                status=status.HTTP_400_BAD_REQUEST)
+
         offer.is_accepted = True
         cur_user.cur_position = offer.position.position_name
         cur_user.is_staff = True
