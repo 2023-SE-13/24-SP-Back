@@ -60,14 +60,13 @@ def recommend_subscribe(request):
         "companies": []
     }
     if len(related_users) < 6:
-        hotest_users = User.objects.filter().order_by('-user_subscription')[:6]
-        related_users = list(chain(hotest_users, related_users))
+        hotest_users = User.objects.filter().annotate(num_common_skills=Count('skills')).order_by('-user_subscription').exclude(username=user.username)[:6]
+        related_users = related_users.union(hotest_users)
         
     if len(related_companies) < 6:
         hotest_companies = Company.objects.filter().order_by('-company_subscription')[:6]
-        related_companies = list(chain(hotest_companies, related_companies))
-    related_users = related_users[:6]
-    related_companies = related_companies[:6]
+        related_companies = related_companies.union(hotest_companies)
+    
     for related_user in related_users:
         company_member = CompanyMember.objects.filter(user=related_user).first()
         company_name = ""
