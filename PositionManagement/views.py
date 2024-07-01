@@ -303,21 +303,24 @@ def get_offer_list(request):
 def update_offer(request):
     data = json.loads(request.body.decode('utf-8'))
     cur_user = request.user
+    offer = Offer.objects.filter(offer_id=data.get('offer_id')).first()
     state = data.get('state')
+    if offer is None or offer.receiver != cur_user:
+        return JsonResponse({"status": "error", "message": "Offer does not exist"},
+                            status=status.HTTP_400_BAD_REQUEST)
+    if offer.is_accepted is not None:
+        return JsonResponse({"status": "error", "message": "Offer has been processed"},
+                            status=status.HTTP_400_BAD_REQUEST)
     if state == 'accept':
-        offer = Offer.objects.filter(offer_id=data.get('offer_id')).first()
-        if offer is None or offer.receiver != cur_user:
-            return JsonResponse({"status": "error", "message": "Offer does not exist"},
-                                status=status.HTTP_400_BAD_REQUEST)
         offer.is_accepted = True
         Application.objects.filter(application_id=offer.application.application_id).update(result='Offer Accepted')
+        cur_user.cur_position = offer.position.position_name
+        cur_user.is_staff = True
+        cur_user.save()
+        CompanyMember.objects.create(user=cur_user, company=offer.company, role='Staff')
         offer.save()
         return JsonResponse({'status': 'success', "message": "Offer Accepted"}, status=status.HTTP_200_OK)
     else:
-        offer = Offer.objects.filter(offer_id=data.get('offer_id')).first()
-        if offer is None or offer.receiver != cur_user:
-            return JsonResponse({"status": "error", "message": "Offer does not exist"},
-                                status=status.HTTP_400_BAD_REQUEST)
         offer.is_accepted = False
         Application.objects.filter(application_id=offer.application.application_id).update(result='Offer Rejected')
         offer.save()

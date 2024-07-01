@@ -67,7 +67,7 @@ class Offer(models.Model):
     receiver = models.ForeignKey(User, on_delete=models.CASCADE)
     position = models.ForeignKey(Position, on_delete=models.CASCADE)
     offer_at = models.DateTimeField()
-    is_accepted = models.BooleanField(default=False)
+    is_accepted = models.BooleanField(null=True, blank=True, default=None)
 
     class Meta:
         db_table = 'offers'
