@@ -3,6 +3,8 @@ from django.db.models import Count, QuerySet
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
+from itertools import chain
+
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.exceptions import AuthenticationFailed
@@ -52,20 +54,20 @@ def recommend_subscribe(request):
     related_users = User.objects.filter(skills__in=user_skills).exclude(username=user.username).annotate(num_common_skills=Count('skills')).filter(num_common_skills__gt=0).order_by('-num_common_skills')
     related_companies = QuerySet(Company)
     for position in positions:  
-        related_companies += position.company
+        related_companies = related_companies.union(Company.objects.filter(company_id=position.company_id))
     recommends = {
         "users": [],
         "companies": []
     }
     if len(related_users) < 6:
         hotest_users = User.objects.filter().order_by('-user_subscription')[:6]
-        related_users += hotest_users
-        related_users.distinct()
+        related_users = list(chain(hotest_users, related_users))
+        
     if len(related_companies) < 6:
         hotest_companies = Company.objects.filter().order_by('-company_subscription')[:6]
-        related_companies += hotest_companies
-        related_companies.distinct()
-
+        related_companies = list(chain(hotest_companies, related_companies))
+    related_users = related_users[:6]
+    related_companies = related_companies[:6]
     for related_user in related_users:
         company_member = CompanyMember.objects.filter(user=related_user).first()
         company_name = ""
@@ -96,7 +98,9 @@ def recommend_position(request):
         desired_position = user.desired_position.all()
         if desired_position:
             related_positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
-
+            if len(related_positions) < 6:
+                latest_positions = Position.objects.filter().order_by('-posted_at')[:6]
+                related_positions = list(chain(related_positions, latest_positions))[:6]
             for related_position in related_positions:
                 recommends.append(PositionSerializer(related_position).data)
         else:
