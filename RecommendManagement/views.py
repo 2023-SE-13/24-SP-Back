@@ -178,7 +178,7 @@ def get_guest_recommendations():
 def get_related_positions(desired_positions):
     return Position.objects.filter(position_tag__in=desired_positions).annotate(
         num_common_position_tag=Count('position_tag')).filter(
-        num_common_position_tag__gt=0).order_by('-num_common_position_tag')
+        num_common_position_tag__gt=0).order_by('-posted_at')
 
 
 def add_latest_positions(related_positions):
