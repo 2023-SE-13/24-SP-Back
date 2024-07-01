@@ -17,27 +17,18 @@ from shared.decorators import require_position
 # Create your views here.
 @csrf_exempt
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
 def recommend_subscribe(request):
-    def initial(self, request, *args, **kwargs):
-        try:
-            super().initial(request, *args, **kwargs)
-        except AuthenticationFailed as e:
-            handle_authentication_failed(self,e)
-
-    def handle_authentication_failed(self, exception):
+    if not request.user:
         guest_recommends = {
             "users": [],
             "companies": []
         }
-
-
         guest_hotest_users = User.objects.filter().order_by('-user_subscription')[:5]
         for guest_hotest_user in guest_hotest_users:
             guest_company_member = CompanyMember.objects.filter(user=guest_hotest_user).first()
             guest_company_name = ""
-            if company_member:
+            if guest_company_member:
                 guest_company_name = guest_company_member.company.company_name
             guest_recommends['users'].append({
                 "username": guest_hotest_user.username,
