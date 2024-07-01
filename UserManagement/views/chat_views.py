@@ -90,3 +90,19 @@ def get_messages(request):
     messages = Message.objects.filter(conversation_id=conversation_id).order_by('timestamp')
     serializer = MessageSerializer(messages, many=True)
     return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
+
+
+@csrf_exempt
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_conversation(request):
+    cur_user = request.user
+    conversation_id = request.GET.get('conversation_id')
+    if not conversation_id:
+        return JsonResponse({'status': 'error', 'message': 'Missing conversation_id parameter'}, status=400)
+    conversation = Conversation.objects.get(conversation_id=conversation_id)
+    if cur_user not in {conversation.user1, conversation.user2}:
+        return JsonResponse({'status': 'error', 'message': 'You are not in the conversation'}, status=400)
+    serializer = ConversationSerializer(conversation)
+    return JsonResponse(serializer.data, status=status.HTTP_200_OK, safe=False)
