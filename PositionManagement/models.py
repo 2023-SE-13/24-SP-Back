@@ -41,7 +41,6 @@ class Application(models.Model):
     position = models.ForeignKey('Position', on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     applied_at = models.DateTimeField()
-    offer = models.ForeignKey('Offer', on_delete=models.CASCADE, null=True, blank=True, default=None, related_name='applications')
     result = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
@@ -62,7 +61,6 @@ class Application(models.Model):
 class Offer(models.Model):
     offer_id = models.UUIDField(primary_key=True, auto_created=True, unique=True, editable=False,
                                 default=uuid.uuid4)
-    application = models.ForeignKey(Application, on_delete=models.CASCADE, null=True, blank=True,  related_name='offers')
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, on_delete=models.CASCADE)
     position = models.ForeignKey(Position, on_delete=models.CASCADE)
