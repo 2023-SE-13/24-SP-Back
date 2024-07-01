@@ -312,7 +312,7 @@ def update_offer(request):
         if cur_user.is_staff or CompanyMember.objects.filter(user=cur_user).exists():
             return JsonResponse({"status": "error",
                                  "message": "You are already a staff. Please quit your current company first"},
-                                status=status.HTTP_400_BAD_REQUEST)
+                                status=status.HTTP_406_NOT_ACCEPTABLE)
 
         offer.is_accepted = True
         cur_user.cur_position = offer.position.position_name
