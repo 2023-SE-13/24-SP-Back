@@ -251,7 +251,7 @@ def create_offer(request):
     create_notification(json.dumps({
         "username": application.user.username,
         "notification_type": "system",
-        "content": f"You have received an offer from {company.company_name} for {position.position_name}",
+        "content": f"【offer】 {company.company_name}",
         "company_id": str(company.company_id),
         "position_id": str(position.position_id),
     }))

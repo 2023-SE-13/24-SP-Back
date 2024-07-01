@@ -84,6 +84,7 @@ def get_user_notifications(request):
             "content": notification.content,
             "company_name": notification.company.company_name if notification.company else None,
             "username": notification.user.username,
+            'realname': notification.user.real_name,
             "position_name": notification.position.position_name if notification.position else None,
         })
     return Response({"status": "success", "data": data}, status=status.HTTP_200_OK)
