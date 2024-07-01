@@ -105,7 +105,7 @@ def recommend_position(request):
         if desired_position:
             related_positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
             if len(related_positions) < 6:
-                latest_positions = Position.objects.filter().order_by('-posted_at')[:6]
+                latest_positions = Position.objects.filter().annotate(num_common_position_tag=Count('position_tag')).order_by('-posted_at')[:6]
                 related_positions = related_positions.union(latest_positions)
             i = 0
             for related_position in related_positions:
