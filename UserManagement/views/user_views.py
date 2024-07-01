@@ -148,51 +148,58 @@ def forget_password(request):
     user.save()
     return JsonResponse({"status": "success", "message": "Password updated successfully"}, status=status.HTTP_200_OK)
 
-
 @api_view(['PUT'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def update_user(request):
-    data = request.data  # 获取前端传入的JSON数据
-
-    # 获取通过Token验证的当前用户
+    data = request.data
     current_user = User.objects.get(username=request.user.username)
 
-    if data.get('password') is not None or data.get('email') is not None:
-        verification_code = VerificationCode.objects.filter(email=current_user.email).order_by('-created_at').first()
-
-        if not verification_code or verification_code.code != data.get('code'):
+    if 'password' in data or 'email' in data:
+        if not validate_verification_code(current_user.email, data.get('code')):
             return JsonResponse({"status": "error", "message": "ERROR CODE"}, status=status.HTTP_401_UNAUTHORIZED)
 
-        if verification_code.expires_at < timezone.now():
-            return JsonResponse({"status": "error", "message": "Verification code expired"},
-                                status=status.HTTP_401_UNAUTHORIZED)
-
-    # 在这里进行实际的更新操作
     try:
-        fields_to_update = ['password', 'real_name', 'email', 'education', 'blog_link',
-                            'repository_link', 'desired_work_city', 'salary_min', 'salary_max',
-                            'years_of_service', 'cur_position', 'school', 'age']
-
-        for field in fields_to_update:
-            if data.get(field) is not None and getattr(current_user, field) != data.get(field):
-                setattr(current_user, field, data.get(field))
-        desired_position = data.get('desired_position')
-        skills = data.get('skills')
-        if skills:
-            current_user.skills.clear()
-            for skill in skills:
-                current_user.skills.add(Skill.objects.get(name=skill))
-        if desired_position:
-            current_user.desired_position.clear()
-            for positiontag in desired_position:
-                current_user.desired_position.add(PositionTag.objects.get(category=positiontag.get('category'), specialization=positiontag.get('specialization')))
-        # 保存更改
+        update_user_fields(current_user, data)
+        update_user_relationships(current_user, data)
         current_user.save()
         return JsonResponse({"status": "success", "message": "Profile updated successfully"}, status=status.HTTP_200_OK)
-
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+def validate_verification_code(email, code):
+    verification_code = VerificationCode.objects.filter(email=email).order_by('-created_at').first()
+    if not verification_code or verification_code.code != code:
+        return False
+    if verification_code.expires_at < timezone.now():
+        return JsonResponse({"status": "error", "message": "Verification code expired"},
+                            status=status.HTTP_401_UNAUTHORIZED)
+    return True
+
+def update_user_fields(user, data):
+    fields_to_update = [
+        'password', 'real_name', 'email', 'education', 'blog_link',
+        'repository_link', 'desired_work_city', 'salary_min', 'salary_max',
+        'years_of_service', 'cur_position', 'school', 'age'
+    ]
+    for field in fields_to_update:
+        if field in data and getattr(user, field) != data[field]:
+            setattr(user, field, data[field])
+
+def update_user_relationships(user, data):
+    if 'skills' in data:
+        user.skills.clear()
+        for skill in data['skills']:
+            user.skills.add(Skill.objects.get(name=skill))
+    if 'desired_position' in data:
+        user.desired_position.clear()
+        for positiontag in data['desired_position']:
+            user.desired_position.add(
+                PositionTag.objects.get(
+                    category=positiontag.get('category'),
+                    specialization=positiontag.get('specialization')
+                )
+            )
 
 
 @csrf_exempt
