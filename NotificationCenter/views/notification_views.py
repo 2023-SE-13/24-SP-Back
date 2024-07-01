@@ -83,6 +83,7 @@ def get_user_notifications(request):
             "created_at": notification.created_at.strftime('%Y-%m-%d'),
             "content": notification.content,
             "company_name": notification.company.company_name if notification.company else "",
+            "company_id": notification.company.company_id if notification.company else "",
             "username": notification.user.username,
             'realname': notification.user.real_name,
             "position_name": notification.position.position_name if notification.position else "",
