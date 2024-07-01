@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 
 from CompanyManagement.models import Company
-from PositionManagement.models import Position
+from PositionManagement.models import Position, Offer
 from TweetManagement.models import Tweet
 from UserManagement.models import User, Message
 
@@ -25,3 +25,4 @@ class Notification(models.Model):
     company = models.ForeignKey(Company, related_name='notifications', on_delete=models.SET_NULL, null=True)
     message = models.ForeignKey(Message, related_name='notifications', on_delete=models.SET_NULL, null=True)
     position = models.ForeignKey(Position, related_name='notifications', on_delete=models.SET_NULL, null=True)
+    offer = models.ForeignKey(Offer, related_name='notifications', on_delete=models.SET_NULL, null=True)
