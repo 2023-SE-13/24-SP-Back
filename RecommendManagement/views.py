@@ -26,7 +26,7 @@ def recommend_subscribe(request):
             "users": [],
             "companies": []
         }
-        guest_hotest_users = User.objects.filter().order_by('-user_subscription')[:6]
+        guest_hotest_users = User.objects.filter().order_by('-user_subscription')[:9]
         for guest_hotest_user in guest_hotest_users:
             guest_company_member = CompanyMember.objects.filter(user=guest_hotest_user).first()
             guest_company_name = ""
@@ -37,7 +37,7 @@ def recommend_subscribe(request):
                 "avatar": os.path.basename(guest_hotest_user.avatar.name) if guest_hotest_user.avatar.name else "",
                 "company_name": guest_company_name,
             })
-        guest_hotest_companies = Company.objects.filter().order_by('-company_subscription')[:6]
+        guest_hotest_companies = Company.objects.filter().order_by('-company_subscription')[:12]
         for guest_hotest_company in guest_hotest_companies:
             guest_recommends['companies'].append({
                 "company_id": guest_hotest_company.company_id,
@@ -106,9 +106,12 @@ def recommend_position(request):
             related_positions = Position.objects.filter(position_tag__in=desired_position).annotate(num_common_position_tag=Count('position_tag')).filter(num_common_position_tag__gt=0).order_by('-num_common_position_tag')
             if len(related_positions) < 6:
                 latest_positions = Position.objects.filter().order_by('-posted_at')[:6]
-                related_positions = list(chain(related_positions, latest_positions))[:6]
+                related_positions = related_positions.union(latest_positions)
+            i = 0
             for related_position in related_positions:
-                recommends.append(PositionSerializer(related_position).data)
+                if i < 6:
+                    i = i + 1
+                    recommends.append(PositionSerializer(related_position).data)
         else:
             latest_positions = Position.objects.filter().order_by('-posted_at')[:6]
             for latest_position in latest_positions:
