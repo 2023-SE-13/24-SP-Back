@@ -62,6 +62,5 @@ class Likes(models.Model):
     
 @receiver(post_delete, sender=TweetPhoto)
 def delete_photo(sender, instance, **kwargs):
-    if instance.photo:
-        if os.path.isfile(instance.photo.path):
-            os.remove(instance.photo.path)
+    if instance.photo and os.path.isfile(instance.photo.path):
+        os.remove(instance.photo.path)
