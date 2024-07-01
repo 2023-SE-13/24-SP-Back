@@ -150,7 +150,7 @@ def get_subscribe_user(request):
         data.append({
             "username": subscribe_user.user_dst.username,
             "avatar": os.path.basename(subscribe_user.user_dst.avatar.name),
-            "company_name": CompanyMember.objects.get(user=subscribe_user).company.company_name if CompanyMember.objects.filter(user=subscribe_user).exists() else "",
+            "company_name": CompanyMember.objects.get(user=subscribe_user.user_dst).company.company_name if CompanyMember.objects.filter(user=subscribe_user.user_dst).exists() else "",
         })
     return Response({"status": "success", "data": data}, status=status.HTTP_200_OK)
 
