@@ -33,24 +33,24 @@ def recommend_subscribe(request):
         }
 
 
-        guest_hotest_users = User.objects.filter().order_by('-user_subscription')[:5 - len(related_users)]
+        guest_hotest_users = User.objects.filter().order_by('-user_subscription')[:5]
         for guest_hotest_user in guest_hotest_users:
-            guest_company_member = CompanyMember.objects.filter(user=hotest_user).first()
+            guest_company_member = CompanyMember.objects.filter(user=guest_hotest_user).first()
             guest_company_name = ""
             if company_member:
-                guest_company_name = company_member.company.company_name
+                guest_company_name = guest_company_member.company.company_name
             guest_recommends['users'].append({
-                "username": hotest_user.username,
-                "avatar": os.path.basename(hotest_user.avatar.name) if hotest_user.avatar.name else "",
+                "username": guest_hotest_user.username,
+                "avatar": os.path.basename(guest_hotest_user.avatar.name) if guest_hotest_user.avatar.name else "",
                 "company_name": guest_company_name,
             })
-        guest_hotest_companies = Company.objects.filter().order_by('-company_subscription')[:5 - len(related_companies)]
+        guest_hotest_companies = Company.objects.filter().order_by('-company_subscription')[:5]
         for guest_hotest_company in guest_hotest_companies:
             guest_recommends['companies'].append({
-                "company_id": hotest_company.company_id,
-                "company_name": hotest_company.company_name,
+                "company_id": guest_hotest_company.company_id,
+                "company_name": guest_hotest_company.company_name,
                 "company_image": os.path.basename(
-                    hotest_company.company_image.name) if hotest_company.company_image.name else "",
+                    guest_hotest_company.company_image.name) if guest_hotest_company.company_image.name else "",
             })
         return JsonResponse({"status": "success", "data": guest_recommends}, status=200)
     user = User.objects.get(username =request.user.username)
