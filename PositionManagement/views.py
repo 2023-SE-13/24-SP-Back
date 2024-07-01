@@ -309,7 +309,7 @@ def update_offer(request):
         return JsonResponse({"status": "error", "message": "Offer has been processed"},
                             status=status.HTTP_400_BAD_REQUEST)
     if state == 'accept':
-        if cur_user.is_staff:
+        if cur_user.is_staff or CompanyMember.objects.filter(user=cur_user).exists():
             return JsonResponse({"status": "error",
                                  "message": "You are already a staff. Please quit your current company first"},
                                 status=status.HTTP_400_BAD_REQUEST)
