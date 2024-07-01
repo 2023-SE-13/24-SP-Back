@@ -155,9 +155,8 @@ def update_user(request):
     data = request.data
     current_user = User.objects.get(username=request.user.username)
 
-    if 'password' in data or 'email' in data:
-        if not validate_verification_code(current_user.email, data.get('code')):
-            return JsonResponse({"status": "error", "message": "ERROR CODE"}, status=status.HTTP_401_UNAUTHORIZED)
+    if ('password' in data or 'email' in data) and not validate_verification_code(current_user.email, data.get('code')):
+        return JsonResponse({"status": "error", "message": "ERROR CODE"}, status=status.HTTP_401_UNAUTHORIZED)
 
     try:
         update_user_fields(current_user, data)
