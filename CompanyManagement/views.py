@@ -291,7 +291,7 @@ def is_to_join(request):
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def transfer_admin(request):
-    company = request.company_objects
+    company = request.company_object
     admin_user = request.user
     user_to_transfer = request.user_object
     company_member = CompanyMember.objects.filter(company=company, user=user_to_transfer)
