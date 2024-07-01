@@ -161,7 +161,7 @@ def apply_position(request):
                             status=status.HTTP_400_BAD_REQUEST)
     if User.objects.get(username=cur_usr.username).resume is None or User.objects.get(username=cur_usr.username).resume == '':
         return JsonResponse({"status": "miss", "message": "Please upload your resume before applying for a position"},
-                            status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
     tz = pytz.timezone('Asia/Shanghai')
     utc8time = timezone.now().astimezone(tz)
     application = Application(user=cur_usr, position=position, applied_at=utc8time)
