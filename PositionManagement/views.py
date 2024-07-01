@@ -242,12 +242,11 @@ def create_offer(request):
     if Offer.objects.filter(application=application).exists():
         return JsonResponse({"status": "error", "message": "Offer already exists"},
                             status=status.HTTP_400_BAD_REQUEST)
-    offer = Offer(application=application, company=company, receiver=application.user, position=position)
+    offer = Offer(company=company, receiver=application.user, position=position)
     tz = pytz.timezone('Asia/Shanghai')
     utc8time = timezone.now().astimezone(tz)
     offer.offer_at = utc8time
     offer.save()
-    application.offer = offer
     create_notification(json.dumps({
         "username": application.user.username,
         "notification_type": "system",
@@ -256,6 +255,7 @@ def create_offer(request):
         "position_id": str(position.position_id),
         "offer_id": str(offer.offer_id),
     }))
+    application.delete()
     return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
 
 @csrf_exempt
@@ -313,7 +313,6 @@ def update_offer(request):
                             status=status.HTTP_400_BAD_REQUEST)
     if state == 'accept':
         offer.is_accepted = True
-        Application.objects.filter(application_id=offer.application.application_id).update(result='Offer Accepted')
         cur_user.cur_position = offer.position.position_name
         cur_user.is_staff = True
         cur_user.save()
@@ -322,7 +321,6 @@ def update_offer(request):
         return JsonResponse({'status': 'success', "message": "Offer Accepted"}, status=status.HTTP_200_OK)
     else:
         offer.is_accepted = False
-        Application.objects.filter(application_id=offer.application.application_id).update(result='Offer Rejected')
         offer.save()
         return JsonResponse({'status': 'success', "message": "Offer Rejected"}, status=status.HTTP_200_OK)
 
