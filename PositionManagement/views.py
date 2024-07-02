@@ -68,7 +68,7 @@ def create_position(request):
         create_notification(json.dumps({
             "username": subscriber.user.username,
             "notification_type": "subscribe",
-            "content": f"Company {company.company_name} has created a new position",
+            "content": f"【新职位】 {company.company_name}:{position.position_name}",
             "position_id": str(position.position_id)
         }))
 
