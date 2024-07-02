@@ -102,7 +102,7 @@ def get_related_companies(positions):
     related_companies = QuerySet(Company)
     for position in positions:
         related_companies = related_companies.union(
-            Company.objects.filter(company_id=position.company_id))
+            Company.objects.filter(company_id=position.company.company_id))
     return related_companies
 
 
