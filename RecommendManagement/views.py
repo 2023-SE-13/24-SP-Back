@@ -126,7 +126,7 @@ def get_recommended_users(user, related_users):
 
 
 def get_recommended_companies(related_companies):
-    if len(related_companies) < 6:
+    if len(related_companies) < 12:
         hotest_companies = Company.objects.filter().order_by('-company_subscription')[:12]
         related_companies = related_companies.union(hotest_companies)
 
