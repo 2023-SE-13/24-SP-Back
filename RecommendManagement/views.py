@@ -126,7 +126,7 @@ def get_recommended_users(user, related_users):
 
 
 def get_recommended_companies(related_companies):
-    hotest_companies = Company.objects.filter().order_by('-company_subscription')[:12]
+    hotest_companies = Company.objects.filter().order_by('-company_subscription')[:24]
 
     recommended_companies = []
     i = 0
@@ -144,6 +144,8 @@ def get_recommended_companies(related_companies):
         if i >= 12:
             break
         i = i + 1
+        if hotest_company in related_companies:
+            continue
         recommended_companies.append({
             "company_id": hotest_company.company_id,
             "company_name": hotest_company.company_name,
