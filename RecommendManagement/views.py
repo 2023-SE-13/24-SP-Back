@@ -131,8 +131,9 @@ def get_recommended_companies(related_companies):
         related_companies = related_companies.union(hotest_companies)
 
     recommended_companies = []
-    related_companies.reverse()
-    for i, related_company in enumerate(related_companies):
+    related_companies = list(related_companies).reverse()
+    i = 0
+    for related_company in related_companies:
         if i >= 12:
             break
         recommended_companies.append({
