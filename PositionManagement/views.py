@@ -140,7 +140,7 @@ def delete_position(request):
 @require_company
 def get_position_list(request):
     company = request.company_object
-    positions = Position.objects.filter(company=company)
+    positions = Position.objects.filter(company=company).order_by('-posted_at')
     serializer = PositionSerializer(positions, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -182,7 +182,7 @@ def get_position_applications(request):
     if cm is None or cm.role == 'Staff':
         return JsonResponse({"status": "error", "message": "You are not allowed to view applications"},
                             status=status.HTTP_400_BAD_REQUEST)
-    applications = Application.objects.filter(position__position_id=position.position_id)
+    applications = Application.objects.filter(position__position_id=position.position_id).order_by('-applied_at')
     result = []
     for application in applications:
         result.append({
