@@ -107,7 +107,7 @@ def get_related_companies(positions):
 
 
 def get_recommended_users(user, related_users):
-    if len(related_users) < 6:
+    if len(related_users) < 9:
         hotest_users = User.objects.filter().annotate(num_common_skills=Count('skills')).order_by(
             '-user_subscription').exclude(username=user.username)[:9]
         related_users = related_users.union(hotest_users)
@@ -131,6 +131,7 @@ def get_recommended_companies(related_companies):
         related_companies = related_companies.union(hotest_companies)
 
     recommended_companies = []
+    related_companies.reverse()
     for i, related_company in enumerate(related_companies):
         if i >= 12:
             break
