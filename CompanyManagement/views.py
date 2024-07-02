@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from portalocker import Lock
 
 from CompanyManagement.serializer import CompanySerializer, CompanyMemberUserSerializer
+from NotificationCenter.views.utils.notifications import create_notification
 from UserManagement.models import User
 from CompanyManagement.models import JoinVerification, CompanyMember, Company
 from shared.decorators import require_user, require_company
@@ -188,6 +189,12 @@ def send_join_verification(request):
                             status=status.HTTP_400_BAD_REQUEST)
     # 发送加入验证
     JoinVerification.objects.create(company=company, user=user_to_add)
+    create_notification(json.dumps({
+        "username": user_to_add.username,
+        "notification_type": "system",
+        "content": f"【加入验证】 {current_user.username} 邀请您加入 {company.company_name}, 请到企业主页进行认证",
+        "company_id": str(company.company_id)
+    }))
     return JsonResponse({'status': 'success', "message": "Join verification successfully send to user"},
                         status=status.HTTP_201_CREATED)
 
