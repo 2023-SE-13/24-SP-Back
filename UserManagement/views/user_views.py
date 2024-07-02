@@ -250,6 +250,11 @@ def upload_resume(request):
         if not resume:
             return JsonResponse({"status": "error", "message": "No resume file provided"},
                                 status=status.HTTP_400_BAD_REQUEST)
+
+        if not resume.name.lower().endswith('.pdf'):
+            return JsonResponse({"status": "error", "message": "Only PDF files are allowed"},
+                                status=status.HTTP_406_NOT_ACCEPTABLE)
+
         # 获取用户
         user = User.objects.get(username=request.user.username)
         # 删除旧的简历文件，如果存在的话
