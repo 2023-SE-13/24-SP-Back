@@ -13,6 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from CompanyManagement.models import Company, CompanyMember
 from PositionManagement.models import Position
 from PositionManagement.serializer import PositionSerializer
+from Subscribe.models import SubscribeUser
 from UserManagement.models import User
 from shared.decorators import require_position
 
@@ -109,13 +110,17 @@ def get_related_companies(positions):
 def get_recommended_users(user, related_users):
     if len(related_users) < 9:
         hotest_users = User.objects.filter().annotate(num_common_skills=Count('skills')).order_by(
-            '-user_subscription').exclude(username=user.username)[:9]
+            '-user_subscription').exclude(username=user.username)[:18]
         related_users = related_users.union(hotest_users)
 
     recommended_users = []
-    for i, related_user in enumerate(related_users):
+    i = 0
+    for related_user in related_users:
         if i >= 9:
             break
+        if SubscribeUser.objects.filter(user_dst=related_user, user_src=user).exists():
+            continue
+        i = i + 1
         company_name = get_user_company_name(related_user)
         recommended_users.append({
             "username": related_user.username,
