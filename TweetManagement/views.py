@@ -68,17 +68,17 @@ def create_tweet(request):
             "tweet_id": str(tweet.tweet_id)
         }))
 
-    # 向关注该用户所属公司的所有用户推送通知
-    company_member = CompanyMember.objects.filter(user=user).first()
-    if company_member:
-        company_subscriber = SubscribeCompany.objects.filter(company=company_member.company)
-        for subscriber in company_subscriber:
-            create_notification(json.dumps({
-                "username": subscriber.user.username,
-                "notification_type": "subscribe",
-                "content": f"【新动态】 {subscriber.company.company_name}",
-                "tweet_id": str(tweet.tweet_id)
-            }))
+    # # 向关注该用户所属公司的所有用户推送通知
+    # company_member = CompanyMember.objects.filter(user=user).first()
+    # if company_member:
+    #     company_subscriber = SubscribeCompany.objects.filter(company=company_member.company)
+    #     for subscriber in company_subscriber:
+    #         create_notification(json.dumps({
+    #             "username": subscriber.user.username,
+    #             "notification_type": "subscribe",
+    #             "content": f"【新动态】 {subscriber.company.company_name}",
+    #             "tweet_id": str(tweet.tweet_id)
+    #         }))
 
     return JsonResponse({"status": "success", "message": "Tweet created successfully", "tweet_id": tweet.tweet_id},
                         status=status.HTTP_201_CREATED)
