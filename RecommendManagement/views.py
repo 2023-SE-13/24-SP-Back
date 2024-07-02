@@ -126,21 +126,29 @@ def get_recommended_users(user, related_users):
 
 
 def get_recommended_companies(related_companies):
-    if len(related_companies) < 12:
-        hotest_companies = Company.objects.filter().order_by('-company_subscription')[:12]
-        related_companies = related_companies.union(hotest_companies)
+    hotest_companies = Company.objects.filter().order_by('-company_subscription')[:12]
 
     recommended_companies = []
-    related_companies = list(related_companies).reverse()
     i = 0
     for related_company in related_companies:
         if i >= 12:
             break
+        i = i + 1
         recommended_companies.append({
             "company_id": related_company.company_id,
             "company_name": related_company.company_name,
             "company_image": os.path.basename(
                 related_company.company_image.name) if related_company.company_image.name else "",
+        })
+    for hotest_company in hotest_companies:
+        if i >= 12:
+            break
+        i = i + 1
+        recommended_companies.append({
+            "company_id": hotest_company.company_id,
+            "company_name": hotest_company.company_name,
+            "company_image": os.path.basename(
+                hotest_company.company_image.name) if hotest_company.company_image.name else "",
         })
     return recommended_companies
 
