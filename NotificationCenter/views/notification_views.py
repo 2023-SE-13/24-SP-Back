@@ -1,7 +1,3 @@
-import json
-
-from django.db.models import Q
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -9,9 +5,6 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from NotificationCenter.models import Notification
-from NotificationCenter.serializers import NotificationSerializer
-from NotificationCenter.views.utils.notifications import create_notification
-from shared.decorators import require_user, require_company
 
 
 @csrf_exempt
@@ -72,7 +65,6 @@ def get_user_notifications(request):
     elif require_type == 'system':
         notifications = Notification.objects.filter(user=user, notification_type='system')
 
-    # serializer = NotificationSerializer(notifications, many=True)
     data = []
     for notification in notifications:
         data.append({
@@ -81,14 +73,24 @@ def get_user_notifications(request):
             "is_read": notification.is_read,
             "created_at": notification.created_at.strftime('%Y-%m-%d'),
             "content": notification.content,
-            "company_name": notification.company.company_name if notification.company else "",
-            "company_id": notification.company.company_id if notification.company else "",
+            "company_name": get_attribute(notification.company, 'company_name', ''),
+            "company_id": get_attribute(notification.company, 'company_id', ''),
             "username": notification.user.username,
             'realname': notification.user.real_name,
-            "position_name": notification.position.position_name if notification.position else "",
-            "offer_id": notification.offer.offer_id if notification.offer else "",
+            "position_name": get_attribute(notification.position, 'position_name', ''),
+            "offer_id": get_attribute(notification.offer, 'offer_id', ''),
+            "tweet_id": get_attribute(notification.tweet, 'tweet_id', ''),
+            "message_id": get_attribute(notification.message, 'message_id', ''),
         })
     return Response({"status": "success", "data": data}, status=status.HTTP_200_OK)
+
+
+def get_attribute(obj, attr_name, default=""):
+    """获取模型属性，如果模型是None则返回默认值"""
+    if obj is not None:
+        return getattr(obj, attr_name, default)
+    return default
+
 
 @csrf_exempt
 @api_view(['PUT'])
