@@ -143,9 +143,9 @@ def get_recommended_companies(related_companies):
     for hotest_company in hotest_companies:
         if i >= 12:
             break
-        i = i + 1
         if hotest_company in related_companies:
             continue
+        i = i + 1
         recommended_companies.append({
             "company_id": hotest_company.company_id,
             "company_name": hotest_company.company_name,
